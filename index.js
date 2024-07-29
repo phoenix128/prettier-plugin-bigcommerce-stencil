@@ -17,27 +17,43 @@ const addIndentation = (text, apply, options) => {
     const tabWidth = options.tabWidth || 4;
     const indent = options.useTabs ? '\t' : ' '.repeat(tabWidth);
 
-    return apply ? text.split('\n').map(line => line.length > 0 ? indent + line : '').join('\n') : text;
+    const lines = text.split('\n').map(line => line.length > 0 ? indent + line : '');
+    return apply && lines.length > 0 ? lines.join('\n') : text;
 }
 
-const isMultilineNode = (node) => node.loc.start.line < node.loc.end.line;
-const isLongNode = (node, options) => node.loc.end.column > (options.printWidth || 80);
+const isMultilineNode = (node) => {
+    return node.loc && node.loc.start && node.loc.end
+        ? node.loc.start.line < node.loc.end.line
+        : false;
+};
+
+const isLongNode = (node, options) => {
+    return node.loc && node.loc.start && node.loc.end
+        ? node.loc.end.column > (options.printWidth || 80)
+        : false;
+};
 
 const extractParams = (node, options, print) => {
+    const wasMultilineHash = node.hash && isMultilineNode(node.hash);
+    const shouldIndent = node.hash && (wasMultilineHash || isLongNode(node.hash, options));
+
     const recursivePrint = (n) => printNode(n, options, print);
+    const separator = shouldIndent ? '\n' : ' ';
 
-    const isMultilineParams = node.hash && isMultilineNode(node.hash);
-    const isLong = isLongNode(node, options);
+    const params = node.params?.map(recursivePrint) || [];
+    const hashes = node.hash?.pairs.map((pair, index) => {
+        const key = pair.key;
+        const value = recursivePrint(pair.value);
+        return `${key}=${value}`;
+    }) || [];
 
-    const shouldBreak = isMultilineParams || isLong;
-    if (node.hash) {
-        node.hash.shouldBreak = shouldBreak;
+    const res = [...params, ...hashes].map(t => t.trim()).filter(Boolean).join(separator);
+    if (res.length > 0) {
+        const trailing = shouldIndent ? '\n' : ' ';
+        return trailing + addIndentation(res, shouldIndent, options);
     }
 
-    const params = node.params.length > 0 ? (' ' + (node.params.map(recursivePrint).join(shouldBreak ? "\n" : ' '))) : '';
-    const hash = node.hash ? ` ${recursivePrint(node.hash)}` : '';
-
-    return addIndentation(`${params}${hash}`, shouldBreak, options);
+    return '';
 }
 
 const processOutput = (output) => {
@@ -56,62 +72,79 @@ const printNode = (node, options, print) => {
     const recursivePrint = (n) => printNode(n, options, print);
     const quote = options.singleQuote ? "'" : '"';
 
-    const isMultiline = isMultilineNode(node);
+    const wasMultiline = isMultilineNode(node);
+    const wasLong = isLongNode(node, options);
+    const shouldIndent = wasMultiline || wasLong;
 
-    try {
-        switch (node.type) {
-            case 'Program':
-                return node.body.map(recursivePrint).join('');
+    const params = extractParams(node, options, print);
 
-            case 'ContentStatement':
-                return node.original;
+    const indent = (text) => {
+        const leadingCr = shouldIndent && !text.startsWith('\n') ? '\n' : '';
+        const trailingCr = shouldIndent && !text.endsWith('\n') ? '\n' : '';
 
-            case 'MustacheStatement':
-                const mustacheParams = extractParams(node, options, print);
-                const mustacheContent = `${recursivePrint(node.path)}${mustacheParams}`;
+        return leadingCr + addIndentation(text, shouldIndent, options) + trailingCr;
+    }
 
-                return node.escaped ? `{{${mustacheContent}}}` : `{{{${mustacheContent}}}}`;
+    switch (node.type) {
+        case 'Program':
+            return node.body.map(recursivePrint).join('');
 
-            case 'BlockStatement':
-                const blockParams = extractParams(node, options, print);
+        case 'ContentStatement':
+            return node.original;
 
-                const openBlock = `{{#${recursivePrint(node.path)}${blockParams}}}`;
-                const blockBody = node.program ? addIndentation(recursivePrint(node.program), isMultiline, options) : '';
+        case 'MustacheStatement':
+            const mustacheParams = extractParams(node, options, print);
+            const mustacheContent = `${recursivePrint(node.path)}${mustacheParams}`;
+            return node.escaped ? `{{${mustacheContent}}}` : `{{{${mustacheContent}}}}`;
 
-                const inverseSection = node.inverse ? `{{else}}${addIndentation(recursivePrint(node.inverse), isMultiline, options)}` : '';
-                const closeBlock = `{{/${recursivePrint(node.path)}}}`;
+        case 'BlockStatement':
+            const blockParams = extractParams(node, options, print);
+            const openBlock =  `{{#${recursivePrint(node.path)}${blockParams}}}`;
+            const blockBody = node.program ? indent(recursivePrint(node.program)) : '';
+            const inverseSection = node.inverse ? `{{else}}${indent(recursivePrint(node.inverse))}` : '';
+            const closeBlock = `{{/${recursivePrint(node.path)}}}`;
 
-                return `${openBlock}${blockBody}${inverseSection}${closeBlock}`;
+            return `${openBlock}${blockBody}${inverseSection}${closeBlock}`;
 
-            case 'PartialStatement':
-                const partialParams = extractParams(node, options, print);
-                return `{{> ${recursivePrint(node.name)}${partialParams}}}`;
+        case 'PartialStatement':
+            return `{{> ${recursivePrint(node.name)}${params}}}`;
 
-            case 'CommentStatement':
-                return `{{!--${node.value}--}}`;
+        case 'CommentStatement':
+            return `{{!--${node.value}--}}`;
 
-            case 'PathExpression':
-                return node.original.trim();
+        case 'PathExpression':
+            return node.original.trim();
 
-            case 'StringLiteral':
-                const escapedValue = node.value.replace(new RegExp(quote, 'g'), `\\${quote}`);
-                return `${quote}${escapedValue}${quote}`;
+        case 'StringLiteral':
+            const escapedValue = node.value.replace(new RegExp(quote, 'g'), `\\${quote}`);
+            return `${quote}${escapedValue}${quote}`;
 
-            case 'Hash':
-                const trailing = node.shouldBreak ? '\n' : '';
-                const separator = node.shouldBreak ? '' : ' ';
-                return node.pairs.map(pair => `${trailing}${pair.key}=${recursivePrint(pair.value)}`).join(separator);
+        case 'NumberLiteral':
+            return node.value.toString();
 
-            case 'BooleanLiteral':
-                return node.value ? 'true' : 'false';
+        case 'BooleanLiteral':
+            return node.value ? 'true' : 'false';
 
-            default:
-                console.error(`Unknown node type: ${node.type}`);
-                return node.original?.trim() || '';
-        }
-    } catch (error) {
-        console.error('Error processing node:', error.message);
-        return '';
+        case 'UndefinedLiteral':
+            return 'undefined';
+
+        case 'NullLiteral':
+            return 'null';
+
+        case 'SubExpression':
+            const subParams = extractParams(node, options, print);
+            return `(${recursivePrint(node.path)}${subParams})`;
+
+        case 'DecoratorBlock':
+            const decoratorBody = node.program ? indent(recursivePrint(node.program)) : '';
+            return `{{#*${recursivePrint(node.path)}${params}}}${decoratorBody}{{/${recursivePrint(node.path)}}}`;
+
+        case 'PartialBlockStatement':
+            const partialBlockBody = node.program ? indent(recursivePrint(node.program)) : '';
+            return `{{#> ${recursivePrint(node.name)}${params}}}${partialBlockBody}{{/${recursivePrint(node.name)}}}`;
+
+        default:
+            throw new Error(`Unknown node type: ${node.type}`);
     }
 };
 
@@ -127,7 +160,9 @@ module.exports = {
     defaultOptions: {
         tabWidth: 4,
         singleQuote: false,
-        useTabs: false
+        useTabs: false,
+        printWidth: 80,
+        preserveNewlines: false
     },
     parsers: {
         "stencil-html": {
@@ -138,7 +173,10 @@ module.exports = {
     },
     printers: {
         "stencil-html-ast": {
-            print: (path, options, print) => processOutput(printNode(path.getValue(), options, print)),
+            print: (path, options, print) => {
+                const output = printNode(path.getValue(), options, print);
+                return options.preserveNewlines ? output.trim() : processOutput(output);
+            },
         },
     }
 };
