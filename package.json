@@ -3,8 +3,9 @@
   "version": "1.1.0",
   "description": "Prettier Plugin for BigCommerce Stencil",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "jest"
+    "test": "mocha index.test.js"
   },
   "keywords": [
     "prettier",
@@ -14,9 +15,12 @@
   ],
   "author": "Riccardo Tempesta <riccardo.tempesta@gmail.com>",
   "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
     "prettier": "^3.3.3",
-    "jest": "^29.7.0",
     "@handlebars/parser": "^2.1.0"
+  },
+  "devDependencies": {
+    "mocha": "^10.7.0",
+    "chai": "^5.1.1"
   }
 }
