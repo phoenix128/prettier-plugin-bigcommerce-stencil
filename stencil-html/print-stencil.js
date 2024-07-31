@@ -27,7 +27,8 @@ const printHbsElement = (node, options, print) => {
 
         case "block":
             const blockName = rest[0];
-            return group([`{{#${blockName}`, line, printParams(node), "}}", line, `{{/${blockName}}}`]);
+            // const children = node.children.map(child => printStencil({ node: child }, options, print));
+            return group([`{{#${blockName}`, line, printParams(node), "}}", line, line, `{{/${blockName}}}`]);
 
         case "mustache":
             return group(["{{", softline, printParams(node), "}}"]);
@@ -39,9 +40,9 @@ const printStencil = (path, options, print) => {
 
     switch (node.type) {
         case "element":
-            if (node.namespace === 'hbs') {
-                return printHbsElement(node, options, print);
-            }
+            // if (node.namespace === 'hbs') {
+            //     return printHbsElement(node, options, print);
+            // }
 
             return htmlPrinters.html.print(path, options, print);
 

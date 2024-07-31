@@ -8,16 +8,38 @@ describe('convertMustaches', () => {
     expect(result).to.equal('<hbs:mustache _0="test/test" foo="b&quot;a&quot;r" baz="qux" />');
   })
 
+  it('should convert nested if statements', () => {
+    const text = '{{#if condition}}{{#if nested}}true{{/if}}{{/if}}';
+    const result = convertMustaches(text);
+    expect(result).to.equal('<hbs:block:if _0="condition"><hbs:block:if _0="nested">true</hbs:block:if></hbs:block:if>');
+  });
+
+  it("should convert two non nested blocks", () => {
+    const text = "{{#if condition}}true{{/if}}{{#if nested}}true{{/if}}";
+    const result = convertMustaches(text);
+    expect(result).to.equal('<hbs:block:if _0="condition">true</hbs:block:if><hbs:block:if _0="nested">true</hbs:block:if>');
+  });
+
+  it('should handle empty blocks', () => {
+    const text = '{{#if condition}}{{/if}}';
+    const result = convertMustaches(text);
+    expect(result).to.equal('<hbs:block:if _0="condition"></hbs:block:if>');
+  });
+
   it('should convert if-else statements', () => {
     const text = '{{#if condition}}true{{else}}false{{/if}}';
     const result = convertMustaches(text);
-    expect(result).to.equal('<hbs:if-else><hbs:if _0="condition">true</hbs:if><hbs:else>false</hbs:else></hbs:if-else>');
+    expect(result).to.equal('<hbs:block:if _0="condition">true<hbs:else>false</hbs:else></hbs:block:if>');
   });
 
   it('should convert if-else-if statements with newlines', () => {
     const text = '{{#if condition}}\ntrue\n{{else}}\nfalse\n{{/if}}';
     const result = convertMustaches(text);
-    expect(result).to.equal('<hbs:if-else><hbs:if _0="condition">\ntrue\n</hbs:if><hbs:else>\nfalse\n</hbs:else></hbs:if-else>');
+    expect(result).to.equal('<hbs:block:if _0="condition">\n' +
+      'true\n' +
+      '<hbs:else>\n' +
+      'false\n' +
+      '</hbs:else></hbs:block:if>');
   });
 
   it('should handle nested block helpers', () => {

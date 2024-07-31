@@ -2,6 +2,21 @@ import { expect } from 'chai';
 import preprocessStencil from "./preprocess-stencil.js";
 
 describe('preprocessStencil', () => {
+    it('should correctly process nested blocks', () => {
+        const text = `{{#if true}}\n{{#if true}}\n<div>\n{{test}}\n</div>\n{{/if}}\n{{/if}}`;
+        const expected = '<hbs:block:if _0="true">\n' +
+          '<hbs:block:if _0="true">\n' +
+          '<div>\n' +
+          '<hbs:mustache _0="test" />\n' +
+          '</div>\n' +
+          '</hbs:block:if>\n' +
+          '</hbs:block:if>';
+
+        const result = preprocessStencil(text);
+        expect(result).to.equal(expected);
+
+    });
+
     it('should process a stencil document', () => {
         const text = '{{#partial "page"}}\n' +
           '\n' +
@@ -48,7 +63,7 @@ describe('preprocessStencil', () => {
           '        <h1 class="page-heading"><hbs:mustache _0="page.title" /></h1>\n' +
           '    </hbs:block:unless>\n' +
           '\n' +
-          '    <hbs:if-else><hbs:if _0="page.sub_pages">\n' +
+          '    <hbs:block:if _0="page.sub_pages">\n' +
           '        <nav class="navBar navBar--sub">\n' +
           '            <ul class="navBar-section account-navigation">\n' +
           '                <hbs:block:each _0="page.sub_pages">\n' +
@@ -56,15 +71,15 @@ describe('preprocessStencil', () => {
           '                </hbs:block:each>\n' +
           '            </ul>\n' +
           '        </nav>\n' +
-          '    <hbs:mustache _0="/if" />\n' +
+          '    </hbs:block:if>\n' +
           '\n' +
           '    <div id="contact-us-page" class="page-content page-content--centered">\n' +
-          '        <hbs:mustache _0="#if" _1="forms.contact.success" />\n' +
+          '        <hbs:block:if _0="forms.contact.success">\n' +
           '            <div id="contact-us-success"><hbs:raw _0="lang" _1="forms.contact_us.successful" shopPath="urls.home" /></div>\n' +
-          '        </hbs:if><hbs:else>\n' +
+          '        <hbs:else>\n' +
           '            <p><hbs:raw _0="page.content" /></p>\n' +
           '            <hbs:partial _0="components/page/contact-us-form" />\n' +
-          '        </hbs:else></hbs:if-else>\n' +
+          '        </hbs:else></hbs:block:if>\n' +
           '\n' +
           '    </div>\n' +
           '\n' +

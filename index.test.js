@@ -537,7 +537,7 @@ blog:
     it('should not touch <script> tags', async () => {
         const text = '<script>\n' +
             '    console.log("{{message}}");\n' +
-            '</script>';
+            '</script>\n';
 
         const result = await runPrettier(text);
         expect(result).to.equal(text);
