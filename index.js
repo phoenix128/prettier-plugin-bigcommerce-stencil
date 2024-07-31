@@ -1,11 +1,10 @@
-import { parse } from '@handlebars/parser';
-import printStencil from "./stencil-html/print-stencil.js"
 import preprocessStencil from "./stencil-html/preprocess-stencil.js"
 
 import {
     printers as htmlPrinters,
     parsers as htmlParsers
 } from 'prettier/plugins/html';
+import printStencil from "./stencil-html/print-stencil.js";
 
 export const languages = [
     {
@@ -26,12 +25,11 @@ export const defaultOptions = {
 
 export const parsers = {
     "stencil-html": {
-        astFormat: "stencil-html-ast",
         ...htmlParsers.html,
+        astFormat: "stencil-html-ast",
         parse: async (text, parsers, options) => {
             const hbs = await preprocessStencil(text, options);
             return htmlParsers.html.parse(hbs, options);
-            // return parse(hbs);
         }
     }
 };
@@ -39,6 +37,6 @@ export const parsers = {
 export const printers = {
     "stencil-html-ast": {
         ...htmlPrinters.html,
-        print: htmlPrinters.html.print
+        print: printStencil
     },
 };

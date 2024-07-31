@@ -17,7 +17,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
     });
 
     it('should handle partials with hash', async () => {
-        const text = `{{> test key=value}}\n`;
+        const text = `{{> test key="value"}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(text);
