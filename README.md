@@ -2,11 +2,11 @@
 
 This Prettier plugin provides enhanced formatting for BigCommerce Stencil templates using Handlebars syntax. It aims to improve readability and maintainability of stencil templates by applying consistent styling rules.
 
-## Credits
+## Beware
 
-This plugin is based on the prettier glimmer plugin with added support for stencil specific syntax (like partials).
+This plugin is not officially supported by BigCommerce. It is a community-driven project and is not affiliated with BigCommerce.
 
-See: https://github.com/prettier/prettier/tree/main/src/language-handlebars
+**USE AT YOUR OWN RISK**.
 
 # Table of Contents
 
@@ -83,8 +83,21 @@ To enable formatting with this Prettier plugin in Visual Studio Code, you need t
     },
     "[handlebars]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "editor.formatOnSave": true
     }
+}
+```
+
+To enable automatic formatting on save, add the following configuration:
+
+```json
+{
+  "files.associations": {
+    "*.html": "handlebars"
+  },
+  "[handlebars]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  }
 }
 ```
 
