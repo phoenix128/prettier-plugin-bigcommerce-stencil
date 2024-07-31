@@ -529,6 +529,47 @@ blog:
         expect(result).to.equal(expected);
     });
 
+    it ('should revert a messy document', async () => {
+        const text = '---\n' +
+          'products:\n' +
+          '  new:\n' +
+          '    limit: {{ theme_settings.homepage_new_products_count }}\n' +
+          '  featured:\n' +
+          '    limit: {{ theme_settings.homepage_featured_products_count }}\n' +
+          '  top_sellers:\n' +
+          '    limit: {{ theme_settings.homepage_top_products_count }}\n' +
+          'carousel: {{ theme_settings.homepage_show_carousel }}\n' +
+          'blog:\n' +
+          '  recent_posts:\n' +
+          '    limit: {{ theme_settings.homepage_blog_posts_count }}\n' +
+          '---\n' +
+          '\n' +
+          '{{#partial "hero"}} {{{region name="home_below_menu"}}} {{#and carousel\n' +
+          'carousel.slides.length}} {{> components/carousel\n' +
+          'arrows=theme_settings.homepage_show_carousel_arrows\n' +
+          'play_pause_button=theme_settings.homepage_show_carousel_play_pause_button}}\n' +
+          '{{/and}} {{{region name="home_below_carousel"}}} {{/partial}} {{#partial\n' +
+          '"page"}} {{#each shipping_messages}} {{> components/common/alert/alert-info\n' +
+          'message}} {{/each}}\n' +
+          '\n' +
+          '<div class="main full"> \n' +
+          '  {{#if products.featured}} {{> components/products/featured\n' +
+          '  products=products.featured\n' +
+          '  columns=theme_settings.homepage_featured_products_column_count}} {{/if}}\n' +
+          '  {{{region name="home_below_featured_products"}}} {{#if products.top_sellers}}\n' +
+          '  {{> components/products/top products=products.top_sellers\n' +
+          '  columns=theme_settings.homepage_top_products_column_count}} {{/if}} {{{region\n' +
+          '  name="home_below_top_products"}}} {{#if products.new}} {{>\n' +
+          '  components/products/new products=products.new\n' +
+          '  columns=theme_settings.homepage_new_products_column_count}} {{/if}} {{{region\n' +
+          '  name="home_below_new_products"}}}\n' +
+          '</div>\n' +
+          '{{/partial}} {{> layout/base}}\n';
+
+      const result = await runPrettier(text);
+      expect(result).to.equal(text);
+    })
+
     it('should not touch <script> tags', async () => {
         const text = '<script>\n' +
             '    console.log("{{message}}");\n' +

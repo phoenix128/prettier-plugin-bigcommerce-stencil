@@ -37,8 +37,6 @@ export const printers = {
         print: (path, options, print) => {
             const res = htmlPrinters.html.print(path, options, print);
 
-            // console.log(printer.printDocToString(res, options).formatted);
-
             // Check if it is the print for root and postprocess the output
             if (!path.parent) {
                 const formatted = printer.printDocToString(res, options).formatted;
