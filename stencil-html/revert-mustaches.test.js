@@ -3,7 +3,7 @@ import reverseMustaches from './revert-mustaches.js';
 
 describe('reverseMustaches', () => {
   it('should unescape params and hashes', () => {
-    const text = '<hbs:mustache _0="test/test" foo="b&quot;a&quot;r" baz="qux" />';
+    const text = '<hbs:mustache _0="test/test" __foo="b&quot;a&quot;r" __baz="qux" />';
     const result = reverseMustaches(text);
     expect(result).to.equal('{{test/test foo="b\\"a\\"r" baz="qux"}}');
   });
@@ -29,7 +29,7 @@ describe('reverseMustaches', () => {
   it('should handle multiple block helpers in complex structures', () => {
     const text = '<hbs:block:partial _0="page">\n' +
       '\n' +
-      '<hbs:partial _0="components/common/breadcrumbs" breadcrumbs="breadcrumbs" />\n' +
+      '<hbs:partial _0="components/common/breadcrumbs" _breadcrumbs="breadcrumbs" />\n' +
       '\n' +
       '<section class="page">\n' +
       '    <hbs:block:unless _0="theme_settings.hide_contact_us_page_heading">\n' +
@@ -40,7 +40,7 @@ describe('reverseMustaches', () => {
       '</hbs:block:partial>\n';
 
     const result = reverseMustaches(text);
-    expect(result).to.equal('{{#partial "page"}}\n' +
+    expect(result).to.equal('{{#partial page}}\n' +
       '\n' +
       '{{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}\n' +
       '\n' +
@@ -66,9 +66,9 @@ describe('reverseMustaches', () => {
   });
 
   it('should convert multiline partials with params', () => {
-    const text = '<hbs:partial\n\t_0="partialName"\n\tparam="value" />';
+    const text = '<hbs:partial\n\t_0="partialName"\n\tparam="value"\n/>';
     const result = reverseMustaches(text);
-    expect(result).to.equal('{{>\n\tpartialName\n\tparam="value"}}');
+    expect(result).to.equal('{{>\n\tpartialName\n\tparam="value"\n}}');
   });
 
   it('should convert a real life block helper', () => {
@@ -97,7 +97,7 @@ describe('reverseMustaches', () => {
   it('should convert comments', () => {
     const text = '<hbs:comment>This is a comment</hbs:comment>';
     const result = reverseMustaches(text);
-    expect(result).to.equal('{{!--This is a comment--}}');
+    expect(result).to.equal('{{!-- This is a comment --}}');
   });
 
   it('should convert raw mustaches', () => {

@@ -40,7 +40,7 @@ export const printers = {
         print: (path, options, print) => {
             const res = printStencil(path, options, print);
 
-            // CHeck if it is the print for root and postprocess the output
+            // Check if it is the print for root and postprocess the output
             if (path.parent?.type === 'root') {
                 const formatted = printer.printDocToString(res, options).formatted;
                 return reverseMustaches(formatted);

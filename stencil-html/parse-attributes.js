@@ -1,79 +1,35 @@
-const parseAttributes = (attributeString) => {
+export default function parseAttributes(attributeString) {
   const result = [];
-  let currentKey = '';
-  let currentValue = '';
-  let inQuotes = false;
-  let quoteChar = '';
-  let isKey = true;
-  let escapeNext = false;
+  const regex = /([^\s"'=]+)\s*=\s*("[^"]*"|'[^']*'|[^\s"']+)|(?:"[^"]*"|'[^']*'|[^\s"']+)/g;
+  let match;
 
-  // Loop through each character in the attribute string
-  for (let i = 0; i < attributeString.length; i++) {
-    const char = attributeString[i];
+  while ((match = regex.exec(attributeString)) !== null) {
+    if (match[1]) {
+      // Key-value pair
+      const key = match[1];
+      let value = match[2];
 
-    // Handle escape characters
-    if (escapeNext) {
-      currentValue += char;
-      escapeNext = false;
-    } else if (char === '\\') {
-      escapeNext = true;
-    } else if (inQuotes) {
-      // Handle quoted values
-      if (char === quoteChar) {
-        inQuotes = false;
-        if (isKey) {
-          currentKey = currentValue;
-        } else {
-          result.push([currentKey, currentValue]);
-          currentKey = '';
-        }
-        currentValue = '';
-        isKey = true;
-      } else {
-        currentValue += char;
+      // Handle mixed quotes within single quotes
+      if (value.startsWith("'") && value.includes('"')) {
+        value = `"${value.slice(1, -1).replace(/"/g, '&quot;')}"`;
+      } else if (value.startsWith("'")) {
+        // Convert single quotes to double quotes
+        value = `"${value.slice(1, -1)}"`;
       }
-    } else {
-      // Handle non-quoted characters
-      if (char === '"' || char === "'") {
-        inQuotes = true;
-        quoteChar = char;
-      } else if (char === '=') {
-        isKey = false;
-      } else if (char === ' ' || char === '\n') {
-        if (currentKey) {
-          if (currentValue) {
-            result.push([currentKey, currentValue]);
-          } else {
-            result.push(currentKey);
-          }
-        } else if (currentValue) {
-          result.push(currentValue);
-        }
-        currentKey = '';
-        currentValue = '';
-        isKey = true;
-      } else {
-        if (isKey) {
-          currentKey += char;
-        } else {
-          currentValue += char;
-        }
-      }
-    }
-  }
 
-  // Handle the last key-value pair or value if present
-  if (currentKey) {
-    if (currentValue) {
-      result.push([currentKey, currentValue]);
+      result.push([key, value]);
     } else {
-      result.push(currentKey);
+      // Single parameter
+      let param = match[0];
+
+      // Convert single quotes to double quotes for parameters
+      if (param.startsWith("'") && param.endsWith("'")) {
+        param = `"${param.slice(1, -1)}"`;
+      }
+
+      result.push(param);
     }
-  } else if (currentValue) {
-    result.push(currentValue);
   }
 
   return result;
 }
-
-export default parseAttributes;

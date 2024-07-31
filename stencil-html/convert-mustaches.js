@@ -1,14 +1,4 @@
-import parseAttributes from "./parse-attributes.js";
-
-const generateParams = (tagParams) => {
-  const attrs = parseAttributes(tagParams);
-  return attrs.map((attr, index) => {
-    if (Array.isArray(attr)) {
-      return `${attr[0]}="${attr[1].replaceAll('"', '&quot;')}"`;
-    }
-    return `_${index}="${attr.replaceAll('"', '&quot;')}"`;
-  }).join(' ');
-};
+import generateParams from "./generate-params.js";
 
 const tokenize = (text) => {
   const regex = /({{#\s*(\S+)([^}]*)}}|{{\/\s*(\S+)\s*}}|{{else}}|{{>\s*(.+?)\s*}}|{{~\s*([^}]+?)\s*}}|{{!--([\s\S]*?)--}}|{{![^}]*}}|{{{\s*(.+?)\s*}}}|{{\s*(.+?)\s*}})/gm;

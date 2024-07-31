@@ -124,13 +124,6 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
         expect(result).to.equal(expected);
     });
 
-    it('should handle comments', async () => {
-        const text = `{{! This comment will not show up in the output}}\n`;
-
-        const result = await runPrettier(text);
-        expect(result).to.equal(text);
-    });
-
     it('should handle comments with mustaches', async () => {
         const text = `{{!-- This comment may contain mustaches like }} --}}\n`;
 

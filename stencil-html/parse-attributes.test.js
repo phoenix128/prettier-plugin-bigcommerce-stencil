@@ -7,18 +7,18 @@ describe('parseAttributes', () => {
         const result = parseAttributes(attributeString);
 
         expect(result).to.deep.equal([
-            ['foo', 'bar'],
-            ['baz', 'qux'],
+            ['foo', '"bar"'],
+            ['baz', '"qux"'],
         ]);
     });
 
-    it('should parse key/value pairs with single quotes', () => {
+    it('should parse key/value pairs with single quotes and normalize to double', () => {
         const attributeString = "foo='bar' baz='qux'";
         const result = parseAttributes(attributeString);
 
         expect(result).to.deep.equal([
-            ['foo', 'bar'],
-            ['baz', 'qux'],
+            ['foo', '"bar"'],
+            ['baz', '"qux"'],
         ]);
     });
 
@@ -46,7 +46,7 @@ describe('parseAttributes', () => {
         const result = parseAttributes(attributeString);
 
         expect(result).to.deep.equal([
-            'foo', 'bar', 'baz', 'qux',
+            '"foo"', '"bar"', '"baz"', '"qux"',
         ]);
     });
 
@@ -55,7 +55,7 @@ describe('parseAttributes', () => {
         const result = parseAttributes(attributeString);
 
         expect(result).to.deep.equal([
-            'foo', 'bar', 'baz', 'qux',
+            '"foo"', '"bar"', '"baz"', '"qux"',
         ]);
     });
 
@@ -64,7 +64,7 @@ describe('parseAttributes', () => {
         const result = parseAttributes(attributeString);
 
         expect(result).to.deep.equal([
-            'foo', 'bar', 'baz', 'qux',
+            '"foo"', 'bar', '"baz"', 'qux',
         ]);
     });
 
@@ -73,7 +73,7 @@ describe('parseAttributes', () => {
         const result = parseAttributes(attributeString);
 
         expect(result).to.deep.equal([
-            'foo', 'bar', ['baz', 'qux'], 'quux',
+            'foo', 'bar', ['baz', '"qux"'], 'quux',
         ]);
     });
 
@@ -86,16 +86,36 @@ describe('parseAttributes', () => {
         const result = parseAttributes(attributeString);
 
         expect(result).to.deep.equal([
-            'foo', 'bar', ['baz', 'qux'], 'quux'
+            'foo', 'bar', ['baz', '"qux"'], 'quux'
         ]);
     });
 
-    it ('should handle mixed quotes', () => {
+    it ('should handle mixed quotes within single quotes', () => {
         const attributeString = 'foo=\'b"a"r\'';
         const result = parseAttributes(attributeString);
 
         expect(result).to.deep.equal([
-            ['foo', 'b"a"r'],
+            ['foo', '"b&quot;a&quot;r"'],
         ]);
     });
+
+    it ('should accept params with slashes', () => {
+        const attributeString = 'test/test key=value';
+        const result = parseAttributes(attributeString);
+
+        expect(result).to.deep.equal([
+            'test/test',
+            ['key', 'value'],
+        ]);
+    })
+
+    it ('should accept params with dots', () => {
+        const attributeString = 'test.test key=value';
+        const result = parseAttributes(attributeString);
+
+        expect(result).to.deep.equal([
+            'test.test',
+            ['key', 'value'],
+        ]);
+    })
 });

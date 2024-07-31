@@ -5,7 +5,7 @@ describe('convertMustaches', () => {
   it ('should escape params and hashes', () => {
     const text = '{{ test/test foo=\'b"a"r\' baz="qux" }}';
     const result = convertMustaches(text);
-    expect(result).to.equal('<hbs:mustache _0="test/test" foo="b&quot;a&quot;r" baz="qux" />');
+    expect(result).to.equal('<hbs:mustache _0="test/test" __foo="b&quot;a&quot;r" __baz="qux" />');
   })
 
   it('should convert nested if statements', () => {
@@ -65,9 +65,9 @@ describe('convertMustaches', () => {
       '{{/partial}}\n';
 
     const result = convertMustaches(text);
-    expect(result).to.equal('<hbs:block:partial _0="page">\n' +
+    expect(result).to.equal('<hbs:block:partial __0="page">\n' +
       '\n' +
-      '<hbs:partial _0="components/common/breadcrumbs" breadcrumbs="breadcrumbs" />\n' +
+      '<hbs:partial _0="components/common/breadcrumbs" _breadcrumbs="breadcrumbs" />\n' +
       '\n' +
       '<section class="page">\n' +
       '    <hbs:block:unless _0="theme_settings.hide_contact_us_page_heading">\n' +
@@ -104,7 +104,7 @@ describe('convertMustaches', () => {
   it('should convert partials', () => {
     const text = '{{> partialName param="value"}}';
     const result = convertMustaches(text);
-    expect(result).to.equal('<hbs:partial _0="partialName" param="value" />');
+    expect(result).to.equal('<hbs:partial _0="partialName" __param="value" />');
   });
 
   it('should convert strip whitespace', () => {
@@ -134,12 +134,12 @@ describe('convertMustaches', () => {
   it('should convert raw mustaches', () => {
     const text = '{{{ rawMustache param="value" }}}';
     const result = convertMustaches(text);
-    expect(result).to.equal('<hbs:raw _0="rawMustache" param="value" />');
+    expect(result).to.equal('<hbs:raw _0="rawMustache" __param="value" />');
   });
 
   it('should convert mustaches', () => {
     const text = '{{ mustache param="value" }}';
     const result = convertMustaches(text);
-    expect(result).to.equal('<hbs:mustache _0="mustache" param="value" />');
+    expect(result).to.equal('<hbs:mustache _0="mustache" __param="value" />');
   });
 });

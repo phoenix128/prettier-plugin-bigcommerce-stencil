@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "mocha index.test.js"
+    "test": "mocha **/*.test.js"
   },
   "keywords": [
     "prettier",
