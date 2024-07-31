@@ -570,6 +570,46 @@ blog:
       expect(result).to.equal(text);
     })
 
+    it ('should correctly manage pages with conditional blocks', async () => {
+        const text = '{{#partial "page"}}\n' +
+          '\n' +
+          '{{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}\n' +
+          '\n' +
+          '<section class="page">\n' +
+          '    {{#unless theme_settings.hide_contact_us_page_heading }}\n' +
+          '        <h1 class="page-heading">{{page.title}}</h1>\n' +
+          '    {{/unless}}\n' +
+          '\n' +
+          '    {{#if page.sub_pages}} \n' +
+          '        <nav class="navBar navBar--sub">\n' +
+          '            <ul class="navBar-section account-navigation">\n' +
+          '                {{#each page.sub_pages}}\n' +
+          '                    <li class="navBar-item"><a class="navBar-action" href="{{url}}">{{title}}</a></li>\n' +
+          '                {{/each}}\n' +
+          '            </ul>\n' +
+          '        </nav>\n' +
+          '    {{/if}}\n' +
+          '\n' +
+          '    <div id="contact-us-page" class="page-content page-content--centered">\n' +
+          '        {{#if forms.contact.success}}\n' +
+          '            <div id="contact-us-success">{{{lang \'forms.contact_us.successful\' shopPath=urls.home}}}</div>\n' +
+          '        {{else}}\n' +
+          '            <p>{{{page.content}}}</p>\n' +
+          '            {{> components/page/contact-us-form}}\n' +
+          '        {{/if}}\n' +
+          '\n' +
+          '    </div>\n' +
+          '\n' +
+          '</section>\n' +
+          '\n' +
+          '{{/partial}}\n' +
+          '\n' +
+          '{{> layout/base}}\n';
+
+        const result = await runPrettier(text);
+        expect(result).to.equal(text);
+    });
+
     it('should not touch <script> tags', async () => {
         const text = '<script>\n' +
             '    console.log("{{message}}");\n' +
