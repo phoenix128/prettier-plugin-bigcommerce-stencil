@@ -1,8 +1,11 @@
+import { parse } from '@handlebars/parser';
+import printStencil from "./stencil-html/print-stencil.js"
+import preprocessStencil from "./stencil-html/preprocess-stencil.js"
+
 import {
-    printers as glimmerPrinters,
-    parsers as glimmerParsers
-} from 'prettier/plugins/glimmer';
-import { printer as docPrinter } from 'prettier/doc';
+    printers as htmlPrinters,
+    parsers as htmlParsers
+} from 'prettier/plugins/html';
 
 export const languages = [
     {
@@ -23,36 +26,19 @@ export const defaultOptions = {
 
 export const parsers = {
     "stencil-html": {
-        ...glimmerParsers.glimmer,
         astFormat: "stencil-html-ast",
-        parse: (text, options) => {
-            // Replace partials with a temporary placeholder since glimmer does not support partials
-            const noPartials = text
-                .replace(/{{>\s+([^}]+)}}/gm, (match, p1) => {
-                    console.log(match)
-                    return `{{$partial ${p1.replace(/\//g, '_')}}}`;
-                });
-
-            return glimmerParsers.glimmer.parse(noPartials, options);
+        ...htmlParsers.html,
+        parse: async (text, parsers, options) => {
+            const hbs = await preprocessStencil(text, options);
+            return htmlParsers.html.parse(hbs, options);
+            // return parse(hbs);
         }
     }
 };
 
 export const printers = {
     "stencil-html-ast": {
-        ...glimmerPrinters.glimmer,
-        print: (path, options, print) => {
-            const output = glimmerPrinters.glimmer.print(path, options, print);
-            const { formatted } = docPrinter.printDocToString(output, options);
-
-            // Replace temporary placeholders with the original partials
-            if (formatted.startsWith('{{$partial ')) {
-                return formatted.replace(/{{\$partial\s+([^}]+)}}/gm, (match, p1) => {
-                    return `{{> ${p1.replace(/_/g, '/')}}}`;
-                });
-            }
-
-            return output;
-        }
+        ...htmlPrinters.html,
+        print: htmlPrinters.html.print
     },
 };

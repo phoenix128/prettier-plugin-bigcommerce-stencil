@@ -2,6 +2,12 @@
 
 This Prettier plugin provides enhanced formatting for BigCommerce Stencil templates using Handlebars syntax. It aims to improve readability and maintainability of stencil templates by applying consistent styling rules.
 
+## Credits
+
+This plugin is based on the prettier glimmer plugin with added support for stencil specific syntax (like partials).
+
+See: https://github.com/prettier/prettier/tree/main/src/language-handlebars
+
 # Table of Contents
 
 - [Features](#features)

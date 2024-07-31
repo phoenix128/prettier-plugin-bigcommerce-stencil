@@ -1,46 +1,102 @@
 import { expect } from 'chai';
 import prettier from "prettier"
 
-const options = {
-    tabWidth: 4,
-    singleQuote: false,
-    useTabs: false,
-    printWidth: 80,
-    preserveNewlines: false
-}
-
 const runPrettier = async (text) => {
-    return prettier.format(text, {
+    return await prettier.format(text, {
         parser: 'stencil-html',
         plugins: ['./index.js'],
-        ...options
     })
 }
 
 describe('prettier-plugin-bigcommerce-stencil', () => {
     it('should handle partials', async () => {
-        const text = `{{> test}}`;
+        const text = `{{> test}}\n`;
+
+        const result = await runPrettier(text);
+        expect(result).to.equal(text);
+    });
+
+    it('should handle partials with hash', async () => {
+        const text = `{{> test key=value}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(text);
     });
 
     it('should indent correctly', async () => {
-        const text = `{{#if true}}\n{{#if true}}\n<div>\n{{> 'test'}}\n</div>\n{{/if}}\n{{/if}}`;
+        const text = `{{#if true}}\n{{#if true}}\n<div>\n{{test}}\n</div>\n{{/if}}\n{{/if}}`;
         const expected = '{{#if true}}\n' +
             '    {{#if true}}\n' +
             '        <div>\n' +
-            '            {{> "test"}}\n' +
+            '            {{test}}\n' +
             '        </div>\n' +
             '    {{/if}}\n' +
-            '{{/if}}';
+            '{{/if}}\n';
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
     });
 
+    it ('should correctly handle indentation and newlines inside html tags', async () => {
+        const text = '{{#partial "page"}}<div>\r\n' +
+            '    <h1>\r\n' +
+            '        {{#if true}}\n' +
+            '            {{add a="1" b="2"}}\n' +
+            '        {{/if}}\n' +
+            '    </h1>\n' +
+            '</div>{{/partial}}\n';
+
+        const result = await runPrettier(text);
+        expect(result).to.equal(text);
+    });
+
+    it('should correctly count columns for softwrap', async () => {
+        const text = '{{test1 a=1}}\n'+
+            '{{test2 a=1}}\n'+
+            '{{test3 a=1}}\n'+
+            '{{test4 a=1}}\n'+
+            '{{test5 a=1}}\n'+
+            '{{test6 a=1}}\n'+
+            '{{test7 a=1}}\n'+
+            '{{test8 a=1}}\n'+
+            '{{test9 a=1}}\n'+
+            '{{test10 a=1}}\n'+
+            '{{test11 a=1}}\n'+
+            '{{test12 a=1}}\n'+
+            '{{test13 a=1}}\n'+
+            '{{test14 a=1}}\n'+
+            '{{test15 a=1}}\n';
+
+        const result = await runPrettier(text);
+        expect(result).to.equal(text);
+    });
+
+    it('should correctly count columns for softwrap inside a wrapping html', async () => {
+        const text =
+            '<div>\n'+
+            '{{test1 a=1}}\n'+
+            '{{test2 a=1}}\n'+
+            '{{test3 a=1}}\n'+
+            '{{test4 a=1}}\n'+
+            '{{test5 a=1}}\n'+
+            '{{test6 a=1}}\n'+
+            '{{test7 a=1}}\n'+
+            '{{test8 a=1}}\n'+
+            '{{test9 a=1}}\n'+
+            '{{test10 a=1}}\n'+
+            '{{test11 a=1}}\n'+
+            '{{test12 a=1}}\n'+
+            '{{test13 a=1}}\n'+
+            '{{test14 a=1}}\n'+
+            '{{test15 a=1}}\n'
+            '</div>\n';
+
+        const result = await runPrettier(text);
+        expect(result).to.equal(text);
+    });
+
     it('should preserve inline blocks', async () => {
-        const text = `{{#if true}}{{add 1 2}}{{/if}}`;
+        const text = `{{#if true}}{{add 1 2}}{{/if}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(text);
@@ -48,7 +104,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
 
     it ('should add a newline at the end of the file', async () => {
         const text = `{{#if true}}{{add 1 2}}{{/if}}`;
-        const expected = `{{#if true}}{{add 1 2}}{{/if}}`;
+        const expected = `{{#if true}}{{add 1 2}}{{/if}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -62,21 +118,21 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
             '            {{> "test"}}\n' +
             '        </div>\n' +
             '    {{/if}}\n' +
-            '{{/if}}';
+            '{{/if}}\n';
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
     });
 
     it('should handle comments', async () => {
-        const text = `{{! This comment will not show up in the output}}`;
+        const text = `{{! This comment will not show up in the output}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(text);
     });
 
     it('should handle comments with mustaches', async () => {
-        const text = `{{!-- This comment may contain mustaches like }} --}}`;
+        const text = `{{!-- This comment may contain mustaches like }} --}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(text);
@@ -84,7 +140,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
 
     it('should handle and format partials', async () => {
         const text = `{{>   "test"}}`;
-        const expected = `{{> "test"}}`;
+        const expected = `{{> "test"}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -92,7 +148,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
 
     it("should convert quotes to double quotes", async () => {
         const text = `{{> 'test'}}`;
-        const expected = `{{> "test"}}`;
+        const expected = `{{> "test"}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -100,7 +156,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
 
     it('should handle simple mustaches with path', async () => {
         const text = `{{test}}`;
-        const expected = `{{test}}`;
+        const expected = `{{test}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -108,7 +164,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
 
     it('should handle simple mustaches with string', async () => {
         const text = `{{"test"}}`;
-        const expected = `{{"test"}}`;
+        const expected = `{{"test"}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -116,7 +172,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
 
     it('should handle and format hash', async () => {
         const text = `{{test  key=value}}`;
-        const expected = `{{test key=value}}`;
+        const expected = `{{test key=value}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -124,7 +180,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
 
     it('should handle boolean literals', async () => {
         const text = `{{test true}}`;
-        const expected = `{{test true}}`;
+        const expected = `{{test true}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -132,7 +188,15 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
 
     it('should handle parameters', async () => {
         const text = `{{test "somevalue"}}`;
-        const expected = `{{test "somevalue"}}`;
+        const expected = `{{test "somevalue"}}\n`;
+
+        const result = await runPrettier(text);
+        expect(result).to.equal(expected);
+    });
+
+    it('should handle mustache with opening strip', async () => {
+        const text = `{{~test}}`;
+        const expected = `{{~test}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -151,7 +215,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
             '    key8=value8\n' +
             '    key9=value9\n' +
             '    key10=value10\n' +
-            '}}';
+            '}}\n';
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -160,7 +224,10 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
     it('should inline wrongly indented short statements', async () => {
         const text = '{{test key1=value1 key2=value2\n' +
             'key3=value3}}';
-        const expected = '{{test key1=value1 key2=value2 key3=value3}}';
+        const expected = '{{test\n' +
+            '    key1=value1\n' +
+            '    key2=value2\n' +
+            '    key3=value3}}\n';
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -168,7 +235,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
 
     it('should collapse not necessary multiline hashes', async () => {
         const text = `{{test\nkey1=value1\nkey2=value2\nkey3=value3}}`;
-        const expected = '{{test key1=value1 key2=value2 key3=value3}}';
+        const expected = '{{test key1=value1 key2=value2 key3=value3}}\n';
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -176,7 +243,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
 
     it('should handle escaped quotes in hash', async () => {
         const text = `{{test key="some\\"value"}}`;
-        const expected = `{{test key='some"value'}}`;
+        const expected = `{{test key='some"value'}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -184,7 +251,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
 
     it("should remove extra spaces", async () => {
         const text = `{{test  "somevalue"  key=value}}\n`;
-        const expected = `{{test "somevalue" key=value}}`;
+        const expected = `{{test "somevalue" key=value}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -192,7 +259,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
 
     it("should handle triple mustaches", async () => {
         const text = `{{{test "somevalue"}}}`;
-        const expected = `{{{test "somevalue"}}}`;
+        const expected = `{{{test "somevalue"}}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -200,7 +267,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
 
     it("should collapse empty block params", async () => {
         const text = `{{#if true key=value}}\n{{/if}}`;
-        const expected = `{{#if true key=value}}{{/if}}`;
+        const expected = `{{#if true key=value}}{{/if}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -208,7 +275,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
 
     it("should collapse triple newlines in a double newline", async () => {
         const text = `{{someval}}\n\n\n{{someval}}`;
-        const expected = `{{someval}}\n\n{{someval}}`;
+        const expected = `{{someval}}\n\n{{someval}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -237,14 +304,14 @@ blog:
     });
 
     it('should preserve inline syntax for lines not exceeding the length', async () => {
-        const text = `{{#if condition}}{{#each items}}{{this}}{{/each}}{{/if}}`;
+        const text = `{{#if condition}}{{#each items}}{{this}}{{/each}}{{/if}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(text);
     });
 
     it('should handle subexpressions', async () => {
-        const text = `{{helper (subhelper param1 param2)}}`;
+        const text = `{{helper (subhelper param1 param2)}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(text);
@@ -252,7 +319,7 @@ blog:
 
     it('should handle number literals', async () => {
         const text = `{{add 1 2.5}}`;
-        const expected = `{{add 1 2.5}}`;
+        const expected = `{{add 1 2.5}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -260,7 +327,7 @@ blog:
 
     it('should handle undefined and null literals', async () => {
         const text = `{{helper undefined null}}`;
-        const expected = `{{helper undefined null}}`;
+        const expected = `{{helper undefined null}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -369,6 +436,83 @@ blog:
         expect(result).to.equal(expected);
     });
 
+    it('should correctly format a real layout file', async () => {
+        const text = '<!DOCTYPE html>\n' +
+          '<html class="no-js" lang="{{ locale_name }}">\n' +
+          '    <head>\n' +
+          '        <title>{{ head.title }}</title>\n' +
+          '        {{{ resourceHints }}}\n' +
+          '        {{{ head.meta_tags }}}\n' +
+          '        {{{ head.config }}}\n' +
+          '        {{#block "head"}} {{/block}}\n' +
+          '\n' +
+          '        <link href="{{ head.favicon }}" rel="shortcut icon">\n' +
+          '        <meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+          '\n' +
+          '        <script>\n' +
+          '            {{!-- Change document class from no-js to js so we can detect this in css --}}\n' +
+          '            document.documentElement.className = document.documentElement.className.replace(\'no-js\', \'js\');\n' +
+          '        </script>\n' +
+          '\n' +
+          '        {{> components/common/polyfill-script }}\n' +
+          '        <script>window.consentManagerTranslations = `{{{langJson \'consent_manager\'}}}`;</script>\n' +
+          '\n' +
+          '        {{!-- Load Lazysizes script ASAP so images will appear --}}\n' +
+          '        <script>\n' +
+          '            {{!-- Only load visible elements until the onload event fires, after which preload nearby elements. --}}\n' +
+          '            window.lazySizesConfig = window.lazySizesConfig || {};\n' +
+          '            window.lazySizesConfig.loadMode = 1;\n' +
+          '        </script>\n' +
+          '        <script async src="{{cdn \'assets/dist/theme-bundle.head_async.js\' resourceHint=\'preload\' as=\'script\'}}"></script>\n' +
+          '        \n' +
+          '        {{getFontsCollection font-display=\'block\'}}\n' +
+          '        \n' +
+          '        <script async src="{{cdn \'assets/dist/theme-bundle.font.js\' resourceHint=\'preload\' as=\'script\'}}"></script>\n' +
+          '\n' +
+          '        {{{stylesheet \'/assets/css/theme.css\'}}}\n' +
+          '\n' +
+          '        {{{head.scripts}}}\n' +
+          '\n' +
+          '        {{~inject \'zoomSize\' theme_settings.zoom_size}}\n' +
+          '        {{~inject \'productSize\' theme_settings.product_size}}\n' +
+          '        {{~inject \'genericError\' (lang \'common.generic_error\')}}\n' +
+          '        {{~inject \'urls\' urls}}\n' +
+          '        {{~inject \'secureBaseUrl\' settings.secure_base_url}}\n' +
+          '        {{~inject \'cartId\' cart_id}}\n' +
+          '        {{~inject \'template\' template}}\n' +
+          '        {{~inject \'validationDictionaryJSON\' (langJson \'validation_messages\')}}\n' +
+          '        {{~inject \'validationFallbackDictionaryJSON\' (langJson \'validation_fallback_messages\')}}\n' +
+          '        {{~inject \'validationDefaultDictionaryJSON\' (langJson \'validation_default_messages\')}}\n' +
+          '        {{~inject \'carouselArrowAndDotAriaLabel\' (lang \'carousel.arrow_and_dot_aria_label\')}}\n' +
+          '        {{~inject \'carouselActiveDotAriaLabel\' (lang \'carousel.active_dot_aria_label\')}}\n' +
+          '        {{~inject \'carouselContentAnnounceMessage\' (lang \'carousel.content_announce_message\')}}\n' +
+          '    </head>\n' +
+          '    <body>\n' +
+          '        <svg data-src="{{cdn \'img/icon-sprite.svg\'}}" class="icons-svg-sprite"></svg>\n' +
+          '\n' +
+          '        {{> components/common/header }}\n' +
+          '        {{> components/common/body }}\n' +
+          '        {{> components/common/footer }}\n' +
+          '\n' +
+          '        <script>window.__webpack_public_path__ = "{{cdn \'assets/dist/\'}}";</script>\n' +
+          '        <script>\n' +
+          '            {{!-- Exported in app.js --}}\n' +
+          '            function onThemeBundleMain() {\n' +
+          '                window.stencilBootstrap("{{page_type}}", {{jsContext}}).load();\n' +
+          '            }\n' +
+          '        </script>\n' +
+          '        <script async defer src="{{cdn \'assets/dist/theme-bundle.main.js\' resourceHint=\'preload\' as=\'script\'}}" onload="onThemeBundleMain()"></script>\n' +
+          '\n' +
+          '        {{{footer.scripts}}}\n' +
+          '    </body>\n' +
+          '</html>\n'
+
+        const expected = '';
+
+        const result = await runPrettier(text);
+        expect(result).to.equal(expected);
+    });
+
     it('should preserve inline syntax inside an attribute', async () => {
         const text = '<a class="compareTable-removeProduct" data-comparison-remove href="{{#if remove_url}}{{remove_url}}{{else}}#{{/if}}">\n' +
             '    <svg class="icon">\n' +
@@ -388,5 +532,14 @@ blog:
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
+    });
+
+    it('should not touch <script> tags', async () => {
+        const text = '<script>\n' +
+            '    console.log("{{message}}");\n' +
+            '</script>';
+
+        const result = await runPrettier(text);
+        expect(result).to.equal(text);
     });
 });
