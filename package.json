@@ -1,6 +1,6 @@
 {
   "name": "prettier-plugin-bigcommerce-stencil",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Prettier Plugin for BigCommerce Stencil",
   "main": "index.js",
   "type": "module",
