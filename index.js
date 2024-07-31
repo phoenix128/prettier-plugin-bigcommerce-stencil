@@ -1,9 +1,6 @@
 import preprocessStencil from "./stencil-html/preprocess-stencil.js";
-
 import { parsers as htmlParsers, printers as htmlPrinters } from "prettier/plugins/html";
 import { printer } from "prettier/doc";
-
-import printStencil from "./stencil-html/print-stencil.js";
 import reverseMustaches from "./stencil-html/revert-mustaches.js";
 
 export const languages = [
@@ -38,10 +35,12 @@ export const printers = {
     "stencil-html-ast": {
         ...htmlPrinters.html,
         print: (path, options, print) => {
-            const res = printStencil(path, options, print);
+            const res = htmlPrinters.html.print(path, options, print);
+
+            // console.log(printer.printDocToString(res, options).formatted);
 
             // Check if it is the print for root and postprocess the output
-            if (path.parent?.type === 'root') {
+            if (!path.parent) {
                 const formatted = printer.printDocToString(res, options).formatted;
                 return reverseMustaches(formatted);
             }

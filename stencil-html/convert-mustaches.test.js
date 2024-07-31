@@ -142,4 +142,10 @@ describe('convertMustaches', () => {
     const result = convertMustaches(text);
     expect(result).to.equal('<hbs:mustache _0="mustache" __param="value" />');
   });
+
+  it('should convert params with quotes', () => {
+    const text = '{{test key="some\\"value"}}';
+    const result = convertMustaches(text);
+    expect(result).to.equal('');
+  });
 });

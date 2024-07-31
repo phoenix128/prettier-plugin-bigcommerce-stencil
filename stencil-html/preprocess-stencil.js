@@ -12,12 +12,7 @@ const preProcessHbs = (text, options) => {
 }
 
 const preprocessStencil = (text, options) => {
-    if (text.startsWith('---')) {
-        const [_, heading, hbs] = text.split(/^---\n/m);
-        return '---\n' + heading + '---\n' + preProcessHbs(hbs, options);
-    }
-
-    return preProcessHbs(text);
+    return preProcessHbs(text, options);
 }
 
 export default preprocessStencil;

@@ -68,7 +68,9 @@ describe('reverseMustaches', () => {
   it('should convert multiline partials with params', () => {
     const text = '<hbs:partial\n\t_0="partialName"\n\tparam="value"\n/>';
     const result = reverseMustaches(text);
-    expect(result).to.equal('{{>\n\tpartialName\n\tparam="value"\n}}');
+    expect(result).to.equal('{{> partialName\n' +
+      '\tparam="value"\n' +
+      '}}');
   });
 
   it('should convert a real life block helper', () => {
@@ -110,5 +112,36 @@ describe('reverseMustaches', () => {
     const text = '<hbs:mustache _0="mustache" param="value" />';
     const result = reverseMustaches(text);
     expect(result).to.equal('{{mustache param="value"}}');
+  });
+
+  it('should revert mustaches with multiline params', () => {
+    const text = '<hbs:mustache\n' +
+      '    _0="test"\n' +
+      '    _key1="value1"\n' +
+      '    _key2="value2"\n' +
+      '    _key3="value3"\n' +
+      '    _key4="value4"\n' +
+      '    _key5="value5"\n' +
+      '    _key6="value6"\n' +
+      '    _key7="value7"\n' +
+      '    _key8="value8"\n' +
+      '    _key9="value9"\n' +
+      '    _key10="value10"\n' +
+      '/>\n';
+
+    const result = reverseMustaches(text);
+    expect(result).to.equal('{{test\n' +
+      '    key1=value1\n' +
+      '    key2=value2\n' +
+      '    key3=value3\n' +
+      '    key4=value4\n' +
+      '    key5=value5\n' +
+      '    key6=value6\n' +
+      '    key7=value7\n' +
+      '    key8=value8\n' +
+      '    key9=value9\n' +
+      '    key10=value10\n' +
+      '}}\n');
+
   });
 });

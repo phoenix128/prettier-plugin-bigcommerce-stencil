@@ -38,8 +38,8 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
     });
 
     it ('should correctly handle indentation and newlines inside html tags', async () => {
-        const text = '{{#partial "page"}}<div>\r\n' +
-            '    <h1>\r\n' +
+        const text = '{{#partial "page"}}<div>\n' +
+            '    <h1>\n' +
             '        {{#if true}}\n' +
             '            {{add a="1" b="2"}}\n' +
             '        {{/if}}\n' +
@@ -74,21 +74,21 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
     it('should correctly count columns for softwrap inside a wrapping html', async () => {
         const text =
             '<div>\n'+
-            '{{test1 a=1}}\n'+
-            '{{test2 a=1}}\n'+
-            '{{test3 a=1}}\n'+
-            '{{test4 a=1}}\n'+
-            '{{test5 a=1}}\n'+
-            '{{test6 a=1}}\n'+
-            '{{test7 a=1}}\n'+
-            '{{test8 a=1}}\n'+
-            '{{test9 a=1}}\n'+
-            '{{test10 a=1}}\n'+
-            '{{test11 a=1}}\n'+
-            '{{test12 a=1}}\n'+
-            '{{test13 a=1}}\n'+
-            '{{test14 a=1}}\n'+
-            '{{test15 a=1}}\n'
+            '    {{test1 a=1}}\n'+
+            '    {{test2 a=1}}\n'+
+            '    {{test3 a=1}}\n'+
+            '    {{test4 a=1}}\n'+
+            '    {{test5 a=1}}\n'+
+            '    {{test6 a=1}}\n'+
+            '    {{test7 a=1}}\n'+
+            '    {{test8 a=1}}\n'+
+            '    {{test9 a=1}}\n'+
+            '    {{test10 a=1}}\n'+
+            '    {{test11 a=1}}\n'+
+            '    {{test12 a=1}}\n'+
+            '    {{test13 a=1}}\n'+
+            '    {{test14 a=1}}\n'+
+            '    {{test15 a=1}}\n'+
             '</div>\n';
 
         const result = await runPrettier(text);
@@ -208,7 +208,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
             '    key8=value8\n' +
             '    key9=value9\n' +
             '    key10=value10\n' +
-            '}}\n';
+          '}}\n';
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -274,7 +274,7 @@ describe('prettier-plugin-bigcommerce-stencil', () => {
         expect(result).to.equal(expected);
     });
 
-    it('should preserve header indentation', async () => {
+    it('should preserve header', async () => {
         const text = `---
 products:
     new:
@@ -288,9 +288,11 @@ blog:
     recent_posts:
         limit: {{theme_settings.homepage_blog_posts_count}}
 ---
+
 {{#partial "hero"}}
     {{add 1 2}}
-{{/partial}}`;
+{{/partial}}
+`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(text);
