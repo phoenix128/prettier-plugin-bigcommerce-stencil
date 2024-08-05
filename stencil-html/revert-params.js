@@ -1,6 +1,6 @@
 const revertParams = (params) => {
     const regex = /(_+)(\w+)="((?:[^"\\]|\\.)*)"|\S+/g;
-    let result = '';
+    let result = "";
     let lastIndex = 0;
 
     while (true) {
@@ -34,7 +34,7 @@ const processMatch = (match) => {
 };
 
 const unescapeValue = (value) => {
-    return value.replaceAll('&quot;', '\\"');
+    return value.replaceAll("&quot;", '\\"');
 };
 
 const isNumericKey = (key) => {

@@ -1,5 +1,8 @@
 import preprocessStencil from "./stencil-html/preprocess-stencil.js";
-import { parsers as htmlParsers, printers as htmlPrinters } from "prettier/plugins/html";
+import {
+    parsers as htmlParsers,
+    printers as htmlPrinters,
+} from "prettier/plugins/html";
 import { printer } from "prettier/doc";
 import reverseMustaches from "./stencil-html/revert-mustaches.js";
 
@@ -8,8 +11,8 @@ export const languages = [
         name: "Prettier plugins for BigCommerce Stencil",
         parsers: ["stencil-html"],
         extensions: [".html"],
-        vscodeLanguageIds: ["handlebars", "html"]
-    }
+        vscodeLanguageIds: ["handlebars", "html"],
+    },
 ];
 
 export const defaultOptions = {
@@ -17,7 +20,7 @@ export const defaultOptions = {
     singleQuote: false,
     useTabs: false,
     printWidth: 80,
-    preserveNewlines: false
+    preserveNewlines: false,
 };
 
 export const parsers = {
@@ -27,8 +30,8 @@ export const parsers = {
         parse: async (text, parsers, options) => {
             const hbs = await preprocessStencil(text, options);
             return htmlParsers.html.parse(hbs, options);
-        }
-    }
+        },
+    },
 };
 
 export const printers = {
@@ -39,11 +42,14 @@ export const printers = {
 
             // Check if it is the print for root and postprocess the output
             if (!path.parent) {
-                const formatted = printer.printDocToString(res, options).formatted;
+                const formatted = printer.printDocToString(
+                    res,
+                    options,
+                ).formatted;
                 return reverseMustaches(formatted);
             }
 
             return res;
-        }
-    }
+        },
+    },
 };

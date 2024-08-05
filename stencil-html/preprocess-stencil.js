@@ -9,10 +9,10 @@ const preProcessHbs = (text, options) => {
     const { dom, placeholders } = sanitizeDom(text);
     const hbsDom = convertMustaches(dom);
     return rehydrateDocument(hbsDom, placeholders);
-}
+};
 
 const preprocessStencil = (text, options) => {
     return preProcessHbs(text, options);
-}
+};
 
 export default preprocessStencil;
