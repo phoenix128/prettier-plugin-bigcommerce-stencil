@@ -1,36 +1,26 @@
 const revertParams = (params) => {
-    const regex = /(_+)(\w+)="((?:[^"\\]|\\.)*)"|\S+/g;
-    let result = "";
-    let lastIndex = 0;
+    const regex =
+        /(?<underscores>_+)(?<key>\w+)=(?<quote>["'])(?<value>(?:\\\3|.)*?)\3(?<spaceEnd>\s*)/g;
 
-    while (true) {
-        const match = regex.exec(params);
-        if (!match) break;
-
-        result += preserveSpacing(params, lastIndex, match.index);
-        result += processMatch(match);
-        lastIndex = regex.lastIndex;
+    const matches = Array.from(params.matchAll(regex));
+    if (!matches) {
+        return "";
     }
 
-    result += params.slice(lastIndex);
-    return result;
-};
-
-const preserveSpacing = (params, start, end) => {
-    return params.slice(start, end);
+    return matches.map(processMatch).join("").trim();
 };
 
 const processMatch = (match) => {
-    if (!match[1]) return match[0];
-
-    const [, underscores, key, value] = match;
+    const { underscores, key, value, spaceEnd, quote } = match.groups;
     const unescapedValue = unescapeValue(value);
 
     if (isNumericKey(key)) {
-        return formatNumericParam(underscores, unescapedValue);
-    } else {
-        return formatNamedParam(underscores, key, unescapedValue);
+        return formatParam(underscores, unescapedValue, quote) + spaceEnd;
     }
+
+    return (
+        formatHashedParam(underscores, key, unescapedValue, quote) + spaceEnd
+    );
 };
 
 const unescapeValue = (value) => {
@@ -41,12 +31,14 @@ const isNumericKey = (key) => {
     return key.match(/^\d+$/);
 };
 
-const formatNumericParam = (underscores, value) => {
-    return underscores.length > 1 ? `"${value}"` : value;
+const formatParam = (underscores, value, quote) => {
+    return underscores.length > 1 ? `${quote}${value}${quote}` : value;
 };
 
-const formatNamedParam = (underscores, key, value) => {
-    return underscores.length > 1 ? `${key}="${value}"` : `${key}=${value}`;
+const formatHashedParam = (underscores, key, value, quote) => {
+    return underscores.length > 1
+        ? `${key}=${quote}${value}${quote}`
+        : `${key}=${value}`;
 };
 
 export default revertParams;

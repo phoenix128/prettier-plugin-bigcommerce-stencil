@@ -43,4 +43,10 @@ describe("revertParams", () => {
         const result = revertParams(params);
         expect(result).to.equal('"b\\"a\\"r"');
     });
+
+    it("should revert params with single quotes", () => {
+        const params = '__0="foo" __1=\'b"ar\'';
+        const result = revertParams(params);
+        expect(result).to.equal('"foo" \'b"ar\'');
+    });
 });

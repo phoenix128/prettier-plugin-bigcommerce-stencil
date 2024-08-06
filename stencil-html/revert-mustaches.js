@@ -1,57 +1,73 @@
 import revertParams from "./revert-params.js";
 
+const getStripTags = (params) => {
+    const res = {
+        open: "",
+        close: "",
+    };
+
+    if (params.includes("s=")) {
+        const match = params.match(/\s+s="([^"]+)"\s*/);
+        if (match) {
+            if (match[1].includes("o")) {
+                res.open = "~";
+            }
+            if (match[1].includes("c")) {
+                res.close = "~";
+            }
+        }
+    }
+
+    return res;
+};
+
 const revertMustaches = (html) => {
     return html
         .replace(
-            /<\s*hbs:block:(\S+)\s*([\s\S]*?)>/gm,
-            (match, tag, params) => {
+            /<\s*hbs:b:(\S+)\s*([\s\S]*?)(\s*)>/gm,
+            (match, tag, params, spaceEnd) => {
+                if (spaceEnd === " ") spaceEnd = "";
                 const mustacheParams = revertParams(params);
-                return `{{#${tag} ${mustacheParams}}}`;
+                const stripTags = getStripTags(params);
+                return `{{${stripTags.open}#${tag} ${mustacheParams}${spaceEnd}${stripTags.close}}}`;
             },
         )
-        .replace(/<\/\s*hbs:block:(\S+?)\s*>/gm, (match, tag) => {
+        .replace(/<\/\s*hbs:b:(\S+?)\s*><\s*hbs:e:(\1)\s*>/gm, (match, tag) => {
+            return `{{else}}`;
+        })
+        .replace(/<\/\s*hbs:[be]:(\S+?)\s*>/gm, (match, tag) => {
             return `{{/${tag}}}`;
         })
         .replace(
-            /<\s*hbs:partial\s*([\s\S]*?)(\s*)\/>/gm,
+            /<\s*hbs:p\s*([\s\S]*?)(\s*)\/>/gm,
             (match, params, spaceEnd) => {
                 if (spaceEnd === " ") spaceEnd = "";
+                const stripTags = getStripTags(params);
                 const mustacheParams = revertParams(params);
                 if (spaceEnd.includes("\n")) {
-                    return `{{> ${mustacheParams}\n}}`;
+                    return `{{${stripTags.open}> ${mustacheParams}\n${stripTags.close}}}`;
                 }
-                return `{{> ${mustacheParams}${spaceEnd}}}`;
+                return `{{${stripTags.open}> ${mustacheParams}${spaceEnd}${stripTags.close}}}`;
             },
         )
-        .replace(/<\s*hbs:strip\s*(.*?)\s*\/>/gm, (match, params) => {
-            const mustacheParams = revertParams(params);
-            return `{{~${mustacheParams}}}`;
-        })
-        .replace(/<\s*hbs:if-else\s*>/gm, "")
-        .replace(/<\/\s*hbs:if\s*>/gm, "")
-        .replace(/<\/\s*hbs:if-else\s*>/gm, "{{/if}}")
-        .replace(/<\s*hbs:if\s*([\s\S]*?)>/gm, (match, params) => {
-            const mustacheParams = revertParams(params);
-            return `{{#if ${mustacheParams}}}`;
-        })
-        .replace(/<\s*hbs:else\s*>/gm, "{{else}}")
-        .replace(/<\/\s*hbs:else\s*>/gm, "")
-        .replace(/<\s*hbs:comment\s*>/gm, "{{!-- ")
-        .replace(/<\/hbs:comment>/gm, " --}}")
+        .replace(/<\s*hbs:c\s*>/gm, "{{!--")
+        .replace(/<\/hbs:c>/gm, "--}}")
         .replace(
-            /<\s*hbs:mustache\s*([\s\S]*?)(\s*)\/>/gm,
+            /<\s*hbs:m\s*([\s\S]*?)(\s*)\/>/gm,
             (match, params, spaceEnd) => {
                 if (spaceEnd === " ") spaceEnd = "";
+                const stripTags = getStripTags(params);
                 const mustacheParams = revertParams(params);
-                return `{{${mustacheParams}${spaceEnd}}}`;
+                return `{{${stripTags.open}${mustacheParams}${spaceEnd}${stripTags.close}}}`;
             },
         )
         .replace(
-            /<\s*hbs:raw\s*([\s\S]*?)(\s*)\/>/gm,
+            /<\s*hbs:r\s*([\s\S]*?)(\s*)\/>/gm,
             (match, params, spaceEnd) => {
                 if (spaceEnd === " ") spaceEnd = "";
+                const stripTags = getStripTags(params);
                 const mustacheParams = revertParams(params);
-                return `{{{${mustacheParams}${spaceEnd}}}}`;
+                return `{{{${stripTags.open}${mustacheParams}${spaceEnd}${stripTags.close}}}}`;
             },
         );
 };

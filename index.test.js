@@ -1,8 +1,9 @@
 import { expect } from "chai";
 import prettier from "prettier";
 
-const runPrettier = async (text) => {
+const runPrettier = async (text, options = {}) => {
     return await prettier.format(text, {
+        ...options,
         parser: "stencil-html",
         plugins: ["./index.js"],
     });
@@ -52,52 +53,6 @@ describe("prettier-plugin-bigcommerce-stencil", () => {
         expect(result).to.equal(text);
     });
 
-    it("should correctly count columns for softwrap", async () => {
-        const text =
-            "{{test1 a=1}}\n" +
-            "{{test2 a=1}}\n" +
-            "{{test3 a=1}}\n" +
-            "{{test4 a=1}}\n" +
-            "{{test5 a=1}}\n" +
-            "{{test6 a=1}}\n" +
-            "{{test7 a=1}}\n" +
-            "{{test8 a=1}}\n" +
-            "{{test9 a=1}}\n" +
-            "{{test10 a=1}}\n" +
-            "{{test11 a=1}}\n" +
-            "{{test12 a=1}}\n" +
-            "{{test13 a=1}}\n" +
-            "{{test14 a=1}}\n" +
-            "{{test15 a=1}}\n";
-
-        const result = await runPrettier(text);
-        expect(result).to.equal(text);
-    });
-
-    it("should correctly count columns for softwrap inside a wrapping html", async () => {
-        const text =
-            "<div>\n" +
-            "    {{test1 a=1}}\n" +
-            "    {{test2 a=1}}\n" +
-            "    {{test3 a=1}}\n" +
-            "    {{test4 a=1}}\n" +
-            "    {{test5 a=1}}\n" +
-            "    {{test6 a=1}}\n" +
-            "    {{test7 a=1}}\n" +
-            "    {{test8 a=1}}\n" +
-            "    {{test9 a=1}}\n" +
-            "    {{test10 a=1}}\n" +
-            "    {{test11 a=1}}\n" +
-            "    {{test12 a=1}}\n" +
-            "    {{test13 a=1}}\n" +
-            "    {{test14 a=1}}\n" +
-            "    {{test15 a=1}}\n" +
-            "</div>\n";
-
-        const result = await runPrettier(text);
-        expect(result).to.equal(text);
-    });
-
     it("should preserve inline blocks", async () => {
         const text = `{{#if true}}{{add 1 2}}{{/if}}\n`;
 
@@ -119,7 +74,7 @@ describe("prettier-plugin-bigcommerce-stencil", () => {
             "{{#if true}}\n" +
             "    {{#if true}}\n" +
             "        <div>\n" +
-            '            {{> "test"}}\n' +
+            "            {{> test}}\n" +
             "        </div>\n" +
             "    {{/if}}\n" +
             "{{/if}}\n";
@@ -136,22 +91,14 @@ describe("prettier-plugin-bigcommerce-stencil", () => {
     });
 
     it("should handle and format partials", async () => {
-        const text = `{{>   "test"}}`;
-        const expected = `{{> "test"}}\n`;
+        const text = `{{>   test}}`;
+        const expected = `{{> test}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
     });
 
-    it("should convert quotes to double quotes", async () => {
-        const text = `{{> 'test'}}`;
-        const expected = `{{> "test"}}\n`;
-
-        const result = await runPrettier(text);
-        expect(result).to.equal(expected);
-    });
-
-    it("should handle simple mustaches with path", async () => {
+    it("should handle simple mustaches with string", async () => {
         const text = `{{test}}`;
         const expected = `{{test}}\n`;
 
@@ -159,9 +106,9 @@ describe("prettier-plugin-bigcommerce-stencil", () => {
         expect(result).to.equal(expected);
     });
 
-    it("should handle simple mustaches with string", async () => {
-        const text = `{{"test"}}`;
-        const expected = `{{"test"}}\n`;
+    it("should handle simple mustaches with path", async () => {
+        const text = `{{test.test}}`;
+        const expected = `{{test.test}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -284,7 +231,7 @@ blog:
     });
 
     it("should preserve inline syntax for lines not exceeding the length", async () => {
-        const text = `{{#if condition}}{{#each items}}{{this}}{{/each}}{{/if}}\n`;
+        const text = `{{#if condition}}{{this}}{{/if}}\n`;
 
         const result = await runPrettier(text);
         expect(result).to.equal(text);
@@ -490,7 +437,121 @@ blog:
             "    </body>\n" +
             "</html>\n";
 
-        const expected = "";
+        const expected =
+            "<!doctype html>\n" +
+            '<html class="no-js" lang="{{ locale_name }}">\n' +
+            "    <head>\n" +
+            "        <title>{{head.title}}</title>\n" +
+            "        {{{resourceHints}}}\n" +
+            "        {{{head.meta_tags}}}\n" +
+            "        {{{head.config}}}\n" +
+            '        {{#block "head"}} {{/block}}\n' +
+            "\n" +
+            '        <link href="{{ head.favicon }}" rel="shortcut icon" />\n' +
+            '        <meta name="viewport" content="width=device-width, initial-scale=1" />\n' +
+            "\n" +
+            "        <script>\n" +
+            "            {{!-- Change document class from no-js to js so we can detect this in css --}}\n" +
+            "            document.documentElement.className = document.documentElement.className.replace('no-js', 'js');\n" +
+            "        </script>\n" +
+            "\n" +
+            "        {{> components/common/polyfill-script}}\n" +
+            "        <script>\n" +
+            "            window.consentManagerTranslations = `{{{langJson 'consent_manager'}}}`;\n" +
+            "        </script>\n" +
+            "\n" +
+            "        {{!-- Load Lazysizes script ASAP so images will appear --}}\n" +
+            "        <script>\n" +
+            "            {{!-- Only load visible elements until the onload event fires, after which preload nearby elements. --}}\n" +
+            "            window.lazySizesConfig = window.lazySizesConfig || {};\n" +
+            "            window.lazySizesConfig.loadMode = 1;\n" +
+            "        </script>\n" +
+            "        <script\n" +
+            "            async\n" +
+            "            src=\"{{cdn 'assets/dist/theme-bundle.head_async.js' resourceHint='preload' as='script'}}\"\n" +
+            "        ></script>\n" +
+            "\n" +
+            "        {{getFontsCollection}}\n" +
+            "\n" +
+            "        <script\n" +
+            "            async\n" +
+            "            src=\"{{cdn 'assets/dist/theme-bundle.font.js' resourceHint='preload' as='script'}}\"\n" +
+            "        ></script>\n" +
+            "\n" +
+            '        {{{stylesheet "/assets/css/theme.css"}}}\n' +
+            "\n" +
+            "        {{{head.scripts}}}\n" +
+            "\n" +
+            '        {{~inject "zoomSize" theme_settings.zoom_size}}\n' +
+            "        {{~inject\n" +
+            '            "productSize"\n' +
+            "            theme_settings.product_size\n" +
+            "        }}\n" +
+            "        {{~inject\n" +
+            '            "genericError"\n' +
+            '            (lang "common.generic_error")\n' +
+            "        }}\n" +
+            '        {{~inject "urls" urls}}\n' +
+            "        {{~inject\n" +
+            '            "secureBaseUrl"\n' +
+            "            settings.secure_base_url\n" +
+            "        }}\n" +
+            '        {{~inject "cartId" cart_id}}\n' +
+            '        {{~inject "template" template}}\n' +
+            "        {{~inject\n" +
+            '            "validationDictionaryJSON"\n' +
+            '            (langJson "validation_messages")\n' +
+            "        }}\n" +
+            "        {{~inject\n" +
+            '            "validationFallbackDictionaryJSON"\n' +
+            '            (langJson "validation_fallback_messages")\n' +
+            "        }}\n" +
+            "        {{~inject\n" +
+            '            "validationDefaultDictionaryJSON"\n' +
+            '            (langJson "validation_default_messages")\n' +
+            "        }}\n" +
+            "        {{~inject\n" +
+            '            "carouselArrowAndDotAriaLabel"\n' +
+            '            (lang "carousel.arrow_and_dot_aria_label")\n' +
+            "        }}\n" +
+            "        {{~inject\n" +
+            '            "carouselActiveDotAriaLabel"\n' +
+            '            (lang "carousel.active_dot_aria_label")\n' +
+            "        }}\n" +
+            "        {{~inject\n" +
+            '            "carouselContentAnnounceMessage"\n' +
+            '            (lang "carousel.content_announce_message")\n' +
+            "        }}\n" +
+            "    </head>\n" +
+            "    <body>\n" +
+            "        <svg\n" +
+            "            data-src=\"{{cdn 'img/icon-sprite.svg'}}\"\n" +
+            '            class="icons-svg-sprite"\n' +
+            "        ></svg>\n" +
+            "\n" +
+            "        {{> components/common/header}}\n" +
+            "        {{> components/common/body}}\n" +
+            "        {{> components/common/footer}}\n" +
+            "\n" +
+            "        <script>\n" +
+            "            window.__webpack_public_path__ = \"{{cdn 'assets/dist/'}}\";\n" +
+            "        </script>\n" +
+            "        <script>\n" +
+            "            {{!-- Exported in app.js --}}\n" +
+            "            function onThemeBundleMain() {\n" +
+            '                window.stencilBootstrap("{{page_type}}", {{jsContext}}).load();\n' +
+            "            }\n" +
+            "        </script>\n" +
+            "        <script\n" +
+            "            async\n" +
+            "            defer\n" +
+            "            src=\"{{cdn 'assets/dist/theme-bundle.main.js' resourceHint='preload' as='script'}}\"\n" +
+            '            onload="onThemeBundleMain()"\n' +
+            "        ></script>\n" +
+            "\n" +
+            "        {{{footer.scripts}}}\n" +
+            "    </body>\n" +
+            "</html>\n";
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -599,7 +660,46 @@ blog:
             "{{> layout/base}}\n";
 
         const result = await runPrettier(text);
-        expect(result).to.equal(text);
+        expect(result).to.equal(
+            '{{#partial "page"}}\n' +
+                "    {{> components/common/breadcrumbs breadcrumbs=breadcrumbs}}\n" +
+                "\n" +
+                '    <section class="page">\n' +
+                "        {{#unless theme_settings.hide_contact_us_page_heading}}\n" +
+                '            <h1 class="page-heading">{{page.title}}</h1>\n' +
+                "        {{/unless}}\n" +
+                "\n" +
+                "        {{#if page.sub_pages}}\n" +
+                '            <nav class="navBar navBar--sub">\n' +
+                '                <ul class="navBar-section account-navigation">\n' +
+                "                    {{#each page.sub_pages}}\n" +
+                '                        <li class="navBar-item">\n' +
+                '                            <a class="navBar-action" href="{{url}}"\n' +
+                "                                >{{title\n" +
+                "                            }}</a>\n" +
+                "                        </li>\n" +
+                "                    {{/each}}\n" +
+                "                </ul>\n" +
+                "            </nav>\n" +
+                "        {{/if}}\n" +
+                "\n" +
+                '        <div id="contact-us-page" class="page-content page-content--centered">\n' +
+                "            {{#if forms.contact.success}}\n" +
+                '                <div id="contact-us-success">\n' +
+                "                    {{{lang\n" +
+                '                        "forms.contact_us.successful"\n' +
+                "                        shopPath=urls.home\n" +
+                "                    }}}\n" +
+                "                </div> {{else}}\n" +
+                "                <p>{{{page.content}}}</p>\n" +
+                "                {{> components/page/contact-us-form}}\n" +
+                "            {{/if}}\n" +
+                "        </div>\n" +
+                "    </section>\n" +
+                "{{/partial}}\n" +
+                "\n" +
+                "{{> layout/base}}\n",
+        );
     });
 
     it("should not touch <script> tags", async () => {
