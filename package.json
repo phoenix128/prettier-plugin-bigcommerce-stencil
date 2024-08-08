@@ -1,11 +1,11 @@
 {
   "name": "prettier-plugin-bigcommerce-stencil",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Prettier Plugin for BigCommerce Stencil",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "mocha **/*.test.js"
+    "test": "mocha stencil-html/*.test.js index.test.js"
   },
   "keywords": [
     "prettier",
@@ -18,6 +18,9 @@
   "dependencies": {
     "prettier": "^3.3.3",
     "@handlebars/parser": "^2.1.0",
+    "htmlparser2": "^9.1.0",
+    "dom-serializer": "^2.0.0",
+    "jsdom": "^24.1.1",
     "md5": "^2.3.0"
   },
   "devDependencies": {

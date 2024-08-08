@@ -154,4 +154,31 @@ describe("reverseMustaches", () => {
                 "}}\n",
         );
     });
+
+    it("should hande closing tags at newline", () => {
+        const text =
+            '<hbs:b:partial __1="hero">\n' +
+            '    <hbs:r _0="region" __name="home_below_menu" />\n' +
+            '    <hbs:b:and _1="carousel" _2="carousel.slides.length">\n' +
+            '        <hbs:p _0="components/carousel" _arrows="theme_settings.homepage_show_carousel_arrows" _play_pause_button="theme_settings.homepage_show_carousel_play_pause_button" />\n' +
+            "    </hbs:b:and>\n" +
+            "    <hbs:r\n" +
+            '        _0="region"\n' +
+            '        __name="home_below_carousel"\n' +
+            "    />\n" +
+            "</hbs:b:partial>";
+
+        const result = reverseMustaches(text);
+        expect(result).to.equal(
+            '{{#partial "hero"}}\n' +
+                '    {{{region name="home_below_menu"}}}\n' +
+                "    {{#and carousel carousel.slides.length}}\n" +
+                "        {{> components/carousel arrows=theme_settings.homepage_show_carousel_arrows play_pause_button=theme_settings.homepage_show_carousel_play_pause_button}}\n" +
+                "    {{/and}}\n" +
+                "    {{{region\n" +
+                '        name="home_below_carousel"\n' +
+                "    }}}\n" +
+                "{{/partial}}",
+        );
+    });
 });

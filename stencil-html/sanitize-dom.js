@@ -1,37 +1,36 @@
-/**
- * This function replaces any handlebars replacement dangerous position with a placeholder
- * @param html
- */
-const sanitizeDom = (html) => {
-    const placeholders = [];
+function sanitizeDom(html) {
+    let placeholders = [];
     let placeholderIndex = 0;
 
-    // Replace <script> tags content with placeholders
-    html = html.replace(/<script>([\s\S]*?)<\/script>/g, (match, p1) => {
-        placeholders.push(p1);
-        return `<script>___PLACEHOLDER_${placeholderIndex++}__</script>`;
-    });
+    function createPlaceholder(content) {
+        placeholders.push(content);
+        return `___PLACEHOLDER_${placeholderIndex++}__`;
+    }
 
-    // Replace mustaches in attributes with placeholders
-    html = html.replace(/(\w+="[^"]*{{[^"]*}}[^"]*")/g, (match) => {
-        const parts = match.split(/{{|}}/);
-        placeholders.push(`{{${parts[1]}}}`);
-        return match.replace(
-            /{{[^"]*}}/,
-            `___PLACEHOLDER_${placeholderIndex++}__`,
-        );
-    });
-
-    // Replace mustaches inside tags
+    // Replace script tag content
     html = html.replace(
-        /<(\w+)\s*([^>]*)({{(.+?))>/g,
-        (match, tagName, before, mustache) => {
-            placeholders.push(`${before}${mustache}`);
-            return `<${tagName} ___PLACEHOLDER_${placeholderIndex++}__>`;
+        /<\s*script[^>]*>([\s\S]*?)<\s*\/\s*script\s*>/gi,
+        (match, p1) => {
+            const placeholder = createPlaceholder(p1);
+            return match.replace(p1, placeholder);
         },
     );
 
+    const tagRegex = /<\s*([\w-]+)\s*((?:({{.+?}})|[^>])*?)>/g;
+    const tagsWithHbs =
+        html.match(tagRegex)?.filter((tag) => tag.includes("{{")) || [];
+
+    // Replace attributes with mustaches
+    tagsWithHbs.forEach((tagMatch) => {
+        // Replace mustaches with placeholders
+        const mustaches = tagMatch.match(/{{.+?}}/g);
+        mustaches.forEach((mustache) => {
+            const placeholder = createPlaceholder(mustache);
+            html = html.replace(mustache, placeholder);
+        });
+    });
+
     return { dom: html, placeholders };
-};
+}
 
 export default sanitizeDom;

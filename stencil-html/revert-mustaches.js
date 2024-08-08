@@ -44,9 +44,9 @@ const revertMustaches = (html) => {
                 if (spaceEnd === " ") spaceEnd = "";
                 const stripTags = getStripTags(params);
                 const mustacheParams = revertParams(params);
-                if (spaceEnd.includes("\n")) {
-                    return `{{${stripTags.open}> ${mustacheParams}\n${stripTags.close}}}`;
-                }
+                // if (spaceEnd.includes("\n")) {
+                //     return `{{${stripTags.open}> ${mustacheParams}\n${stripTags.close}}}`;
+                // }
                 return `{{${stripTags.open}> ${mustacheParams}${spaceEnd}${stripTags.close}}}`;
             },
         )

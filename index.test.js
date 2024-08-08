@@ -41,13 +41,15 @@ describe("prettier-plugin-bigcommerce-stencil", () => {
 
     it("should correctly handle indentation and newlines inside html tags", async () => {
         const text =
-            '{{#partial "page"}}<div>\n' +
-            "    <h1>\n" +
-            "        {{#if true}}\n" +
-            '            {{add a="1" b="2"}}\n' +
-            "        {{/if}}\n" +
-            "    </h1>\n" +
-            "</div>{{/partial}}\n";
+            '{{#partial "page"}}\n' +
+            "    <div>\n" +
+            "        <h1>\n" +
+            "            {{#if true}}\n" +
+            '                {{add a="1" b="2"}}\n' +
+            "            {{/if}}\n" +
+            "        </h1>\n" +
+            "    </div>\n" +
+            "{{/partial}}\n";
 
         const result = await runPrettier(text);
         expect(result).to.equal(text);
@@ -321,12 +323,14 @@ blog:
             "    recent_posts:\n" +
             "        limit: {{theme_settings.homepage_blog_posts_count}}\n" +
             "---\n" +
+            "\n" +
             '{{#partial "hero"}}\n' +
             '    {{{region name="home_below_menu"}}}\n' +
             "    {{#and carousel carousel.slides.length}}\n" +
             "        {{> components/carousel\n" +
             "            arrows=theme_settings.homepage_show_carousel_arrows\n" +
-            "            play_pause_button=theme_settings.homepage_show_carousel_play_pause_button}}\n" +
+            "            play_pause_button=theme_settings.homepage_show_carousel_play_pause_button\n" +
+            "        }}\n" +
             "    {{/and}}\n" +
             '    {{{region name="home_below_carousel"}}}\n' +
             "{{/partial}}\n" +
@@ -337,29 +341,32 @@ blog:
             "    {{/each}}\n" +
             "\n" +
             '    <div class="main full">\n' +
-            "    {{#if products.featured}}\n" +
-            "        {{> components/products/featured\n" +
-            "            products=products.featured\n" +
-            "            columns=theme_settings.homepage_featured_products_column_count}}\n" +
-            "    {{/if}}\n" +
-            '    {{{region name="home_below_featured_products"}}}\n' +
+            "        {{#if products.featured}}\n" +
+            "            {{> components/products/featured\n" +
+            "                products=products.featured\n" +
+            "                columns=theme_settings.homepage_featured_products_column_count\n" +
+            "            }}\n" +
+            "        {{/if}}\n" +
+            '        {{{region name="home_below_featured_products"}}}\n' +
             "\n" +
-            "    {{#if products.top_sellers}}\n" +
-            "        {{> components/products/top\n" +
-            "            products=products.top_sellers\n" +
-            "            columns=theme_settings.homepage_top_products_column_count}}\n" +
-            "    {{/if}}\n" +
-            '    {{{region name="home_below_top_products"}}}\n' +
+            "        {{#if products.top_sellers}}\n" +
+            "            {{> components/products/top\n" +
+            "                products=products.top_sellers\n" +
+            "                columns=theme_settings.homepage_top_products_column_count\n" +
+            "            }}\n" +
+            "        {{/if}}\n" +
+            '        {{{region name="home_below_top_products"}}}\n' +
             "\n" +
-            "    {{#if products.new}}\n" +
-            "        {{> components/products/new\n" +
-            "            products=products.new\n" +
-            "            columns=theme_settings.homepage_new_products_column_count}}\n" +
-            "    {{/if}}\n" +
-            '    {{{region name="home_below_new_products"}}}\n' +
+            "        {{#if products.new}}\n" +
+            "            {{> components/products/new\n" +
+            "                products=products.new\n" +
+            "                columns=theme_settings.homepage_new_products_column_count\n" +
+            "            }}\n" +
+            "        {{/if}}\n" +
+            '        {{{region name="home_below_new_products"}}}\n' +
             "    </div>\n" +
             "{{/partial}}\n" +
-            "{{> layout/base}}";
+            "{{> layout/base}}\n";
 
         const result = await runPrettier(text);
         expect(result).to.equal(expected);
@@ -567,13 +574,13 @@ blog:
 
         const expected =
             "<a\n" +
-            '  class="compareTable-removeProduct"\n' +
-            "  data-comparison-remove\n" +
-            '  href="{{#if remove_url}}{{remove_url}}{{else}}#{{/if}}"\n' +
+            '    class="compareTable-removeProduct"\n' +
+            "    data-comparison-remove\n" +
+            '    href="{{#if remove_url}}{{remove_url}}{{else}}#{{/if}}"\n' +
             ">\n" +
-            '  <svg class="icon">\n' +
-            '    <use href="#icon-close"></use>\n' +
-            "  </svg>\n" +
+            '    <svg class="icon">\n' +
+            '        <use href="#icon-close"></use>\n' +
+            "    </svg>\n" +
             "</a>\n";
 
         const result = await runPrettier(text);
@@ -619,7 +626,62 @@ blog:
             "{{/partial}} {{> layout/base}}\n";
 
         const result = await runPrettier(text);
-        expect(result).to.equal(text);
+        expect(result).to.equal(
+            "---\n" +
+                "products:\n" +
+                "    new:\n" +
+                "        limit: {{theme_settings.homepage_new_products_count}}\n" +
+                "    featured:\n" +
+                "        limit: {{theme_settings.homepage_featured_products_count}}\n" +
+                "    top_sellers:\n" +
+                "        limit: {{theme_settings.homepage_top_products_count}}\n" +
+                "carousel: {{theme_settings.homepage_show_carousel}}\n" +
+                "blog:\n" +
+                "    recent_posts:\n" +
+                "        limit: {{theme_settings.homepage_blog_posts_count}}\n" +
+                "---\n" +
+                "\n" +
+                '{{#partial "hero"}}\n' +
+                '    {{{region name="home_below_menu"}}}\n' +
+                "    {{#and carousel carousel.slides.length}}\n" +
+                "        {{> components/carousel\n" +
+                "            arrows=theme_settings.homepage_show_carousel_arrows\n" +
+                "            play_pause_button=theme_settings.homepage_show_carousel_play_pause_button\n" +
+                "        }}\n" +
+                "    {{/and}}\n" +
+                '    {{{region name="home_below_carousel"}}}\n' +
+                "{{/partial}}\n" +
+                '{{#partial "page"}}\n' +
+                "    {{#each shipping_messages}}\n" +
+                "        {{> components/common/alert/alert-info message}}\n" +
+                "    {{/each}}\n" +
+                "\n" +
+                '    <div class="main full">\n' +
+                "        {{#if products.featured}}\n" +
+                "            {{> components/products/featured\n" +
+                "                products=products.featured\n" +
+                "                columns=theme_settings.homepage_featured_products_column_count\n" +
+                "            }}\n" +
+                "        {{/if}}\n" +
+                '        {{{region name="home_below_featured_products"}}}\n' +
+                "        {{#if products.top_sellers}}\n" +
+                "            {{> components/products/top\n" +
+                "                products=products.top_sellers\n" +
+                "                columns=theme_settings.homepage_top_products_column_count\n" +
+                "            }}\n" +
+                "        {{/if}}\n" +
+                '        {{{region name="home_below_top_products"}}}\n' +
+                "        {{#if products.new}}\n" +
+                "            {{> components/products/new\n" +
+                "                products=products.new\n" +
+                "                columns=theme_settings.homepage_new_products_column_count\n" +
+                "            }}\n" +
+                "        {{/if}}\n" +
+                '        {{{region name="home_below_new_products"}}}\n' +
+                "    </div>\n" +
+                "{{/partial}}\n" +
+                "{{> layout/base}}\n",
+        );
     });
 
     it("should correctly manage pages with conditional blocks", async () => {

@@ -5,13 +5,13 @@ describe("preprocessStencil", () => {
     it("should correctly process nested blocks", () => {
         const text = `{{#if true}}\n{{#if true}}\n<div>\n{{test}}\n</div>\n{{/if}}\n{{/if}}`;
         const expected =
-            '<hbs:block:if _0="true">\n' +
-            '<hbs:block:if _0="true">\n' +
+            '<hbs:b:if _1="true">\n' +
+            '<hbs:b:if _1="true">\n' +
             "<div>\n" +
-            '<hbs:mustache _0="test" />\n' +
+            '<hbs:m _0="test" />\n' +
             "</div>\n" +
-            "</hbs:block:if>\n" +
-            "</hbs:block:if>";
+            "</hbs:b:if>\n" +
+            "</hbs:b:if>";
 
         const result = preprocessStencil(text);
         expect(result).to.equal(expected);
@@ -56,40 +56,40 @@ describe("preprocessStencil", () => {
 
         const result = preprocessStencil(text);
         expect(result).to.equal(
-            '<hbs:block:partial __0="page">\n' +
+            '<hbs:b:partial __1="page">\n' +
                 "\n" +
-                '<hbs:partial _0="components/common/breadcrumbs" _breadcrumbs="breadcrumbs" />\n' +
+                '<hbs:p _0="components/common/breadcrumbs" _breadcrumbs="breadcrumbs" />\n' +
                 "\n" +
                 '<section class="page">\n' +
-                '    <hbs:block:unless _0="theme_settings.hide_contact_us_page_heading">\n' +
-                '        <h1 class="page-heading"><hbs:mustache _0="page.title" /></h1>\n' +
-                "    </hbs:block:unless>\n" +
+                '    <hbs:b:unless _1="theme_settings.hide_contact_us_page_heading">\n' +
+                '        <h1 class="page-heading"><hbs:m _0="page.title" /></h1>\n' +
+                "    </hbs:b:unless>\n" +
                 "\n" +
-                '    <hbs:block:if _0="page.sub_pages">\n' +
+                '    <hbs:b:if _1="page.sub_pages">\n' +
                 '        <nav class="navBar navBar--sub">\n' +
                 '            <ul class="navBar-section account-navigation">\n' +
-                '                <hbs:block:each _0="page.sub_pages">\n' +
-                '                    <li class="navBar-item"><a class="navBar-action" href="{{url}}"><hbs:mustache _0="title" /></a></li>\n' +
-                "                </hbs:block:each>\n" +
+                '                <hbs:b:each _1="page.sub_pages">\n' +
+                '                    <li class="navBar-item"><a class="navBar-action" href="{{url}}"><hbs:m _0="title" /></a></li>\n' +
+                "                </hbs:b:each>\n" +
                 "            </ul>\n" +
                 "        </nav>\n" +
-                "    </hbs:block:if>\n" +
+                "    </hbs:b:if>\n" +
                 "\n" +
                 '    <div id="contact-us-page" class="page-content page-content--centered">\n' +
-                '        <hbs:block:if _0="forms.contact.success">\n' +
-                '            <div id="contact-us-success"><hbs:raw _0="lang" __1="forms.contact_us.successful" _shopPath="urls.home" /></div>\n' +
-                "        <hbs:else>\n" +
-                '            <p><hbs:raw _0="page.content" /></p>\n' +
-                '            <hbs:partial _0="components/page/contact-us-form" />\n' +
-                "        </hbs:else></hbs:block:if>\n" +
+                '        <hbs:b:if _1="forms.contact.success">\n' +
+                '            <div id="contact-us-success"><hbs:r _0="lang" __1="forms.contact_us.successful" _shopPath="urls.home" /></div>\n' +
+                "        </hbs:b:if><hbs:e:if>\n" +
+                '            <p><hbs:r _0="page.content" /></p>\n' +
+                '            <hbs:p _0="components/page/contact-us-form" />\n' +
+                "        </hbs:e:if>\n" +
                 "\n" +
                 "    </div>\n" +
                 "\n" +
                 "</section>\n" +
                 "\n" +
-                "</hbs:block:partial>\n" +
+                "</hbs:b:partial>\n" +
                 "\n" +
-                '<hbs:partial _0="layout/base" />\n',
+                '<hbs:p _0="layout/base" />\n',
         );
     });
 
@@ -115,15 +115,15 @@ describe("preprocessStencil", () => {
             "<!DOCTYPE html>\n" +
                 '<html lang="{{ locale_name }}">\n' +
                 "<head>\n" +
-                '    <title><hbs:mustache _0="head.title" /></title>\n' +
-                '    <hbs:raw _0="head.meta_tags" />\n' +
-                '    <hbs:raw _0="head.config" />\n' +
+                '    <title><hbs:m _0="head.title" /></title>\n' +
+                '    <hbs:r _0="head.meta_tags" />\n' +
+                '    <hbs:r _0="head.config" />\n' +
                 "\n" +
                 '    <link href="{{ head.favicon }}" rel="shortcut icon">\n' +
-                '    <hbs:block:block __0="head"></hbs:block:block>\n' +
+                '    <hbs:b:block __1="head"></hbs:b:block>\n' +
                 "</head>\n" +
                 "<body>\n" +
-                '    <hbs:block:block __0="page"></hbs:block:block>\n' +
+                '    <hbs:b:block __1="page"></hbs:b:block>\n' +
                 "</body>\n" +
                 "</html>\n",
         );
@@ -207,11 +207,11 @@ describe("preprocessStencil", () => {
             "<!DOCTYPE html>\n" +
                 '<html class="no-js" lang="{{ locale_name }}">\n' +
                 "    <head>\n" +
-                '        <title><hbs:mustache _0="head.title" /></title>\n' +
-                '        <hbs:raw _0="resourceHints" />\n' +
-                '        <hbs:raw _0="head.meta_tags" />\n' +
-                '        <hbs:raw _0="head.config" />\n' +
-                '        <hbs:block:block __0="head"> </hbs:block:block>\n' +
+                '        <title><hbs:m _0="head.title" /></title>\n' +
+                '        <hbs:r _0="resourceHints" />\n' +
+                '        <hbs:r _0="head.meta_tags" />\n' +
+                '        <hbs:r _0="head.config" />\n' +
+                '        <hbs:b:block __1="head"> </hbs:b:block>\n' +
                 "\n" +
                 '        <link href="{{ head.favicon }}" rel="shortcut icon">\n' +
                 '        <meta name="viewport" content="width=device-width, initial-scale=1">\n' +
@@ -221,10 +221,10 @@ describe("preprocessStencil", () => {
                 "            document.documentElement.className = document.documentElement.className.replace('no-js', 'js');\n" +
                 "        </script>\n" +
                 "\n" +
-                '        <hbs:partial _0="components/common/polyfill-script" />\n' +
+                '        <hbs:p _0="components/common/polyfill-script" />\n' +
                 "        <script>window.consentManagerTranslations = `{{{langJson 'consent_manager'}}}`;</script>\n" +
                 "\n" +
-                "        <hbs:comment>Load Lazysizes script ASAP so images will appear</hbs:comment>\n" +
+                "        <hbs:c> Load Lazysizes script ASAP so images will appear </hbs:c>\n" +
                 "        <script>\n" +
                 "            {{!-- Only load visible elements until the onload event fires, after which preload nearby elements. --}}\n" +
                 "            window.lazySizesConfig = window.lazySizesConfig || {};\n" +
@@ -232,34 +232,34 @@ describe("preprocessStencil", () => {
                 "        </script>\n" +
                 "        <script async src=\"{{cdn 'assets/dist/theme-bundle.head_async.js' resourceHint='preload' as='script'}}\"></script>\n" +
                 "        \n" +
-                '        <hbs:mustache _0="getFontsCollection" __font-display="block" />\n' +
+                '        <hbs:m _0="getFontsCollection" __font-display="block" />\n' +
                 "        \n" +
                 "        <script async src=\"{{cdn 'assets/dist/theme-bundle.font.js' resourceHint='preload' as='script'}}\"></script>\n" +
                 "\n" +
-                '        <hbs:raw _0="stylesheet" __1="/assets/css/theme.css" />\n' +
+                '        <hbs:r _0="stylesheet" __1="/assets/css/theme.css" />\n' +
                 "\n" +
-                '        <hbs:raw _0="head.scripts" />\n' +
+                '        <hbs:r _0="head.scripts" />\n' +
                 "\n" +
-                '        <hbs:strip _0="inject" __1="zoomSize" _2="theme_settings.zoom_size" />\n' +
-                '        <hbs:strip _0="inject" __1="productSize" _2="theme_settings.product_size" />\n' +
-                '        <hbs:strip _0="inject" __1="genericError" _2="(lang" __3="common.generic_error" _4=")" />\n' +
-                '        <hbs:strip _0="inject" __1="urls" _2="urls" />\n' +
-                '        <hbs:strip _0="inject" __1="secureBaseUrl" _2="settings.secure_base_url" />\n' +
-                '        <hbs:strip _0="inject" __1="cartId" _2="cart_id" />\n' +
-                '        <hbs:strip _0="inject" __1="template" _2="template" />\n' +
-                '        <hbs:strip _0="inject" __1="validationDictionaryJSON" _2="(langJson" __3="validation_messages" _4=")" />\n' +
-                '        <hbs:strip _0="inject" __1="validationFallbackDictionaryJSON" _2="(langJson" __3="validation_fallback_messages" _4=")" />\n' +
-                '        <hbs:strip _0="inject" __1="validationDefaultDictionaryJSON" _2="(langJson" __3="validation_default_messages" _4=")" />\n' +
-                '        <hbs:strip _0="inject" __1="carouselArrowAndDotAriaLabel" _2="(lang" __3="carousel.arrow_and_dot_aria_label" _4=")" />\n' +
-                '        <hbs:strip _0="inject" __1="carouselActiveDotAriaLabel" _2="(lang" __3="carousel.active_dot_aria_label" _4=")" />\n' +
-                '        <hbs:strip _0="inject" __1="carouselContentAnnounceMessage" _2="(lang" __3="carousel.content_announce_message" _4=")" />\n' +
+                '        <hbs:m _0="inject" __1="zoomSize" _2="theme_settings.zoom_size" s="o" />\n' +
+                '        <hbs:m _0="inject" __1="productSize" _2="theme_settings.product_size" s="o" />\n' +
+                '        <hbs:m _0="inject" __1="genericError" _2="(lang &quot;common.generic_error&quot;)" s="o" />\n' +
+                '        <hbs:m _0="inject" __1="urls" _2="urls" s="o" />\n' +
+                '        <hbs:m _0="inject" __1="secureBaseUrl" _2="settings.secure_base_url" s="o" />\n' +
+                '        <hbs:m _0="inject" __1="cartId" _2="cart_id" s="o" />\n' +
+                '        <hbs:m _0="inject" __1="template" _2="template" s="o" />\n' +
+                '        <hbs:m _0="inject" __1="validationDictionaryJSON" _2="(langJson &quot;validation_messages&quot;)" s="o" />\n' +
+                '        <hbs:m _0="inject" __1="validationFallbackDictionaryJSON" _2="(langJson &quot;validation_fallback_messages&quot;)" s="o" />\n' +
+                '        <hbs:m _0="inject" __1="validationDefaultDictionaryJSON" _2="(langJson &quot;validation_default_messages&quot;)" s="o" />\n' +
+                '        <hbs:m _0="inject" __1="carouselArrowAndDotAriaLabel" _2="(lang &quot;carousel.arrow_and_dot_aria_label&quot;)" s="o" />\n' +
+                '        <hbs:m _0="inject" __1="carouselActiveDotAriaLabel" _2="(lang &quot;carousel.active_dot_aria_label&quot;)" s="o" />\n' +
+                '        <hbs:m _0="inject" __1="carouselContentAnnounceMessage" _2="(lang &quot;carousel.content_announce_message&quot;)" s="o" />\n' +
                 "    </head>\n" +
                 "    <body>\n" +
                 '        <svg data-src="{{cdn \'img/icon-sprite.svg\'}}" class="icons-svg-sprite"></svg>\n' +
                 "\n" +
-                '        <hbs:partial _0="components/common/header" />\n' +
-                '        <hbs:partial _0="components/common/body" />\n' +
-                '        <hbs:partial _0="components/common/footer" />\n' +
+                '        <hbs:p _0="components/common/header" />\n' +
+                '        <hbs:p _0="components/common/body" />\n' +
+                '        <hbs:p _0="components/common/footer" />\n' +
                 "\n" +
                 "        <script>window.__webpack_public_path__ = \"{{cdn 'assets/dist/'}}\";</script>\n" +
                 "        <script>\n" +
@@ -270,7 +270,7 @@ describe("preprocessStencil", () => {
                 "        </script>\n" +
                 "        <script async defer src=\"{{cdn 'assets/dist/theme-bundle.main.js' resourceHint='preload' as='script'}}\" onload=\"onThemeBundleMain()\"></script>\n" +
                 "\n" +
-                '        <hbs:raw _0="footer.scripts" />\n' +
+                '        <hbs:r _0="footer.scripts" />\n' +
                 "    </body>\n" +
                 "</html>\n",
         );

@@ -107,6 +107,30 @@ describe("convertMustaches", () => {
         );
     });
 
+    it("should handle nested block helpers with newlines", () => {
+        const text =
+            '{{#partial "hero"}}\n' +
+            '    {{{region name="home_below_menu"}}}\n' +
+            "    {{#and carousel carousel.slides.length}}\n" +
+            "        {{> components/carousel\n" +
+            "            arrows=theme_settings.homepage_show_carousel_arrows\n" +
+            "            play_pause_button=theme_settings.homepage_show_carousel_play_pause_button}}\n" +
+            "    {{/and}}\n" +
+            '    {{{region name="home_below_carousel"}}}\n' +
+            "{{/partial}}";
+
+        const result = convertMustaches(text);
+        expect(result).to.equal(
+            '<hbs:b:partial __1="hero">\n' +
+                '    <hbs:r _0="region" __name="home_below_menu" />\n' +
+                '    <hbs:b:and _1="carousel" _2="carousel.slides.length">\n' +
+                '        <hbs:p _0="components/carousel" _arrows="theme_settings.homepage_show_carousel_arrows" _play_pause_button="theme_settings.homepage_show_carousel_play_pause_button" />\n' +
+                "    </hbs:b:and>\n" +
+                '    <hbs:r _0="region" __name="home_below_carousel" />\n' +
+                "</hbs:b:partial>",
+        );
+    });
+
     it("should handle multiple block helpers in complex structures", () => {
         const text =
             '{{#partial "page"}}\n' +
